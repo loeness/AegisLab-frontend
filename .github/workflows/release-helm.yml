@@ -1,4 +1,4 @@
-name: Publish Helm Chart
+name: Realease Helm Chart
 
 on:
   push:
@@ -7,14 +7,11 @@ on:
     paths:
       - 'helm/**'
       - '.github/workflows/release-helm.yml'
-    tags:
-      - 'v*'
 
 jobs:
   call-helm-release:
     uses: OperationsPAI/shared-workflows/.github/workflows/release-helm.yml@main
     with: 
-      repo_name: AegisLab-frontend
-      repo_url: https://operationspai.github.io/AegisLab-frontend/
-      tag_push: ${{ startsWith(github.ref, 'refs/tags/') }}
+      repo-name: AegisLab-frontend
+      repo-url: https://operationspai.github.io/AegisLab-frontend/
     secrets: inherit
