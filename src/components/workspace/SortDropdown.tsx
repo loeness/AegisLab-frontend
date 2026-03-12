@@ -10,18 +10,9 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   CloseOutlined,
-  PlusOutlined,
   SortAscendingOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Popover,
-  Radio,
-  Select,
-  Space,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { Button, Popover, Select, Space, Tooltip, Typography } from 'antd';
 
 import type { ColumnConfig, SortField } from '@/types/workspace';
 
@@ -54,6 +45,20 @@ const SortDropdown: FC<SortDropdownProps> = ({
   iconOnly = false,
 }) => {
   const [open, setOpen] = useState(false);
+
+  // Auto-populate default sort field when opening with no active fields
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && sortFields.length === 0 && defaultSortField) {
+      onSortChange([
+        {
+          key: generateSortKey(),
+          field: defaultSortField,
+          order: defaultSortOrder,
+        },
+      ]);
+    }
+    setOpen(newOpen);
+  };
 
   // Filter columns that are sortable
   const sortableColumns = useMemo(
@@ -148,6 +153,14 @@ const SortDropdown: FC<SortDropdownProps> = ({
     sortFields.length < maxSortFields &&
     sortableColumns.length > sortFields.length;
 
+  // Button is "active" (blue) only when sort differs from the default
+  const isNonDefault =
+    sortFields.length > 0 &&
+    !(
+      sortFields.length === 1 &&
+      sortFields[0].field === defaultSortField &&
+      sortFields[0].order === defaultSortOrder
+    );
   const content = (
     <div className='sort-dropdown-content'>
       <Text className='sort-dropdown-header'>Sort runs by...</Text>
@@ -155,13 +168,15 @@ const SortDropdown: FC<SortDropdownProps> = ({
       <div className='sort-dropdown-field-list'>
         {sortFields.map((sortField) => (
           <div key={sortField.key} className='sort-dropdown-field-item'>
-            <Button
-              type='text'
-              size='small'
-              icon={<CloseOutlined />}
-              onClick={() => handleRemoveField(sortField.key)}
-              className='sort-dropdown-field-remove'
-            />
+            {sortFields.length > 1 && (
+              <Button
+                type='text'
+                size='small'
+                icon={<CloseOutlined />}
+                onClick={() => handleRemoveField(sortField.key)}
+                className='sort-dropdown-field-remove'
+              />
+            )}
             <Select
               className='sort-dropdown-field-select'
               value={sortField.field}
@@ -170,21 +185,24 @@ const SortDropdown: FC<SortDropdownProps> = ({
               showSearch
               optionFilterProp='label'
             />
-            <Radio.Group
-              value={sortField.order}
-              onChange={(e) => handleOrderChange(sortField.key, e.target.value)}
-              className='sort-dropdown-field-order'
-              optionType='button'
-              buttonStyle='solid'
+            <Button
+              type='text'
               size='small'
-            >
-              <Radio.Button value='asc'>
-                <ArrowUpOutlined />
-              </Radio.Button>
-              <Radio.Button value='desc'>
-                <ArrowDownOutlined />
-              </Radio.Button>
-            </Radio.Group>
+              icon={
+                sortField.order === 'asc' ? (
+                  <ArrowUpOutlined />
+                ) : (
+                  <ArrowDownOutlined />
+                )
+              }
+              onClick={() =>
+                handleOrderChange(
+                  sortField.key,
+                  sortField.order === 'asc' ? 'desc' : 'asc'
+                )
+              }
+              className={`sort-dropdown-order-toggle ${sortField.order}`}
+            />
           </div>
         ))}
       </div>
@@ -193,13 +211,13 @@ const SortDropdown: FC<SortDropdownProps> = ({
         {canAddMore && (
           <Button
             type='link'
-            icon={<PlusOutlined />}
             onClick={handleAddField}
             className='sort-dropdown-add-field'
           >
             Add another field
           </Button>
         )}
+
         <Button
           type='link'
           onClick={handleResetToDefault}
@@ -211,12 +229,10 @@ const SortDropdown: FC<SortDropdownProps> = ({
     </div>
   );
 
-  const hasSortFields = sortFields.length > 0;
-
   const button = (
     <Button
       icon={<SortAscendingOutlined />}
-      className={`action-button ${hasSortFields ? 'active' : ''}`}
+      className={`action-button ${isNonDefault ? 'active' : ''}`}
       type={iconOnly ? 'text' : 'default'}
       size={iconOnly ? 'small' : 'middle'}
     >
@@ -230,7 +246,7 @@ const SortDropdown: FC<SortDropdownProps> = ({
       trigger='click'
       placement='bottomLeft'
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
       classNames={{ root: 'sort-dropdown-popover' }}
     >
       {iconOnly ? <Tooltip title='Sort'>{button}</Tooltip> : button}

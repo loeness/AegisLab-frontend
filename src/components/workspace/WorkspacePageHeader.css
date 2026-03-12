@@ -98,15 +98,6 @@
 }
 
 /* Dropdown overlay */
-.workspace-selector-dropdown {
-  z-index: 1050 !important;
-}
-
-.workspace-selector-dropdown .ant-dropdown-menu {
-  padding: 0;
-  box-shadow: none;
-  border: none;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

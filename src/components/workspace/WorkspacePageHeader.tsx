@@ -81,10 +81,6 @@ const WorkspacePageHeader: React.FC<WorkspacePageHeaderProps> = ({
           )}
           trigger={['click']}
           placement='bottomLeft'
-          classNames={{ root: 'workspace-selector-dropdown' }}
-          getPopupContainer={(trigger) =>
-            trigger.parentElement || document.body
-          }
         >
           <Button
             type='text'

@@ -4,10 +4,13 @@
 import { useParams } from 'react-router-dom';
 
 import type { ProjectDetailResp } from '@rcabench/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { projectApi } from '@/api/projects';
-import { getProjectIdFromName } from '@/utils/projectNameMap';
+import {
+  getProjectIdFromName,
+  updateProjectNameMap,
+} from '@/utils/projectNameMap';
 
 export interface ProjectContextValue {
   teamName: string | undefined;
@@ -20,7 +23,7 @@ export interface ProjectContextValue {
 
 /**
  * Get project context from URL params
- * Uses cached name→id mapping to optimize API calls
+ * Uses localStorage name→id cache to avoid re-fetching /projects on every refresh.
  */
 export function useProjectContext(): ProjectContextValue {
   const { teamName, projectName } = useParams<{
@@ -28,21 +31,24 @@ export function useProjectContext(): ProjectContextValue {
     projectName: string;
   }>();
 
-  const queryClient = useQueryClient();
+  // Try localStorage cache first (survives page refreshes)
+  const cachedProjectId = getProjectIdFromName(projectName);
 
-  const cachedProjectId = getProjectIdFromName(projectName, (key) =>
-    queryClient.getQueryData(key)
-  );
-
-  // Use getProjects() if not cached, to find project by name
+  // Only fetch project list when cache misses
   const {
     data: projectsData,
     isLoading: isProjectsLoading,
     error: projectsError,
   } = useQuery({
     queryKey: ['projects', 'list'],
-    queryFn: () => projectApi.getProjects(),
+    queryFn: async () => {
+      const data = await projectApi.getProjects();
+      // Persist all returned project names into localStorage cache
+      updateProjectNameMap(data?.items);
+      return data;
+    },
     enabled: !!projectName && !cachedProjectId,
+    staleTime: 5 * 60 * 1000,
   });
 
   const matchedProject = projectsData?.items?.find(

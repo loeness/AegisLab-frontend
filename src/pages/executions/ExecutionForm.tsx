@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
   CloseOutlined,
   DatabaseOutlined,
@@ -11,9 +14,12 @@ import type {
   ContainerResp,
   ContainerVersionResp,
   GenericResponseContainerDetailResp,
+  InjectionResp,
   LabelItem,
   ListContainerResp,
- InjectionResp, ListInjectionResp } from '@rcabench/client';
+  ListInjectionResp,
+  type SubmitExecutionResp,
+} from '@rcabench/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -33,8 +39,6 @@ import {
   Tag,
   Typography,
 } from 'antd';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { containerApi } from '@/api/containers';
 import { executionApi } from '@/api/executions';
@@ -68,16 +72,17 @@ const ExecutionForm = () => {
   });
 
   // Fetch datapacks (injections with build_success state = 4)
-  const { data: datapacksData, isLoading: datapacksLoading } =
-    useQuery<ListInjectionResp | undefined>({
-      queryKey: ['datapacks'],
-      queryFn: () =>
-        injectionApi.getInjections({
-          page: 1,
-          size: 50,
-          state: 4, // DatapackBuildSuccess
-        }),
-    });
+  const { data: datapacksData, isLoading: datapacksLoading } = useQuery<
+    ListInjectionResp | undefined
+  >({
+    queryKey: ['datapacks'],
+    queryFn: () =>
+      injectionApi.listInjections({
+        page: 1,
+        size: 50,
+        state: 4, // DatapackBuildSuccess
+      }),
+  });
 
   // Create execution mutation
   const createMutation = useMutation({
@@ -87,14 +92,16 @@ const ExecutionForm = () => {
         algorithmVersion: data.algorithm_version,
         datapackId: data.datapack_id,
         labels: data.labels
-          ?.filter((l): l is { key: string; value?: string } => l.key !== undefined)
+          ?.filter(
+            (l): l is { key: string; value?: string } => l.key !== undefined
+          )
           .map((l) => ({ key: l.key, value: l.value || '' })),
       }),
-    onSuccess: (response: any) => {
+    onSuccess: (response: SubmitExecutionResp | undefined) => {
       message.success('Execution started successfully');
       queryClient.invalidateQueries({ queryKey: ['executions'] });
-      // 假设响应包含 execution id 或 task id
-      const executionId = response.id || response.task_id || '1';
+      const executionId =
+        response?.items?.[0]?.task_id || response?.group_id || '1';
       navigate(`/executions/${executionId}`);
     },
     onError: (error) => {

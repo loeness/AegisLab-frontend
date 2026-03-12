@@ -26,9 +26,9 @@ export const injectionApi = {
   // ==================== SDK Methods ====================
 
   /**
-   * Get injection list - Using SDK
+   * List injections
    */
-  getInjections: async (params?: {
+  listInjections: async (params?: {
     page?: number;
     size?: number;
     fault_type?: string;
@@ -51,7 +51,7 @@ export const injectionApi = {
   },
 
   /**
-   * Get injection details - Using SDK
+   * Get injection detail
    */
   getInjection: async (
     id: number

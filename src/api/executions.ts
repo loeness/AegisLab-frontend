@@ -41,7 +41,7 @@ export const executionApi = {
       status: params?.status,
       labels: params?.labels,
     });
-    return response.data.data!;
+    return response.data.data as ListExecutionResp;
   },
 
   /**
@@ -50,7 +50,7 @@ export const executionApi = {
   getExecution: async (id: number): Promise<ExecutionDetailResp> => {
     const api = new ExecutionsApi(createApiConfig());
     const response = await api.getExecutionById({ id });
-    return response.data.data!;
+    return response.data.data as ExecutionDetailResp;
   },
 
   /**
@@ -140,4 +140,21 @@ export const executionApi = {
    */
   batchDelete: (ids: number[]) =>
     apiClient.post('/executions/batch-delete', { ids }),
+
+  /**
+   * Search executions with sort/filter - Manual implementation (POST /search)
+   */
+  searchExecutions: async (params: {
+    project_id?: number;
+    page?: number;
+    size?: number;
+    search?: string;
+    sort_by?: Array<{ field: string; order: 'asc' | 'desc' }>;
+    filters?: Record<string, unknown>;
+  }): Promise<ListExecutionResp> => {
+    const response = await apiClient.post<{
+      data: ListExecutionResp;
+    }>('/executions/search', params);
+    return response.data.data;
+  },
 };

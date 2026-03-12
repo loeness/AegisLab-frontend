@@ -119,6 +119,7 @@ const ProjectInjectionList: React.FC = () => {
     setRunsPanelCollapsed,
     // Visibility management
     visibleRuns,
+    runColors,
     setItemsVisible,
     initializeVisibility,
   } = useWorkspaceStore();
@@ -263,16 +264,6 @@ const ProjectInjectionList: React.FC = () => {
         pinned: false,
         order: 7,
       },
-      {
-        key: 'id',
-        title: 'ID',
-        dataIndex: 'id',
-        type: 'number',
-        width: 80,
-        visible: false,
-        pinned: false,
-        order: 100,
-      },
     ];
     return enhancedColumns;
   }, [sharedColumns]);
@@ -281,6 +272,18 @@ const ProjectInjectionList: React.FC = () => {
   const visualizedRowKeys = useMemo(() => {
     return getVisibleIdsFromMap(visibleRuns, 'injections');
   }, [visibleRuns]);
+
+  // Build rowColors: map numeric ID -> color (from store, no recomputation)
+  const rowColors = useMemo(() => {
+    const result: Record<number, string> = {};
+    Object.entries(runColors).forEach(([key, color]) => {
+      if (key.startsWith('inj_')) {
+        const numId = Number(key.slice(4));
+        if (!isNaN(numId)) result[numId] = color;
+      }
+    });
+    return result;
+  }, [runColors]);
 
   // Handle visibility change from table - sync to store
   const handleVisualizeChange = useCallback(
@@ -303,17 +306,55 @@ const ProjectInjectionList: React.FC = () => {
     [visualizedRowKeys, setItemsVisible]
   );
 
+  // Normalize sortFields for stable cache key (omit generated `key` field)
+  const normalizedSortFields = sortFields.map((sf) => ({
+    field: sf.field,
+    order: sf.order,
+  }));
+
+  // Default sort = empty or exactly [created_at desc] — treated as "no sort condition"
+  const isDefaultSort =
+    normalizedSortFields.length === 0 ||
+    (normalizedSortFields.length === 1 &&
+      normalizedSortFields[0].field === 'created_at' &&
+      normalizedSortFields[0].order === 'desc');
+
+  // Determine whether any active conditions require the search API
+  const hasSearchConditions =
+    !!searchText ||
+    !isDefaultSort ||
+    !!groupBy ||
+    Object.keys(injectionsTableSettings.filters || {}).length > 0;
+
   // Fetch injections data
   const { data: injectionsData, isLoading } = useQuery({
-    queryKey: ['injections', projectId, currentPage, pageSize, searchText],
+    queryKey: [
+      'injections',
+      projectId,
+      currentPage,
+      pageSize,
+      searchText,
+      normalizedSortFields,
+      groupBy,
+    ],
     queryFn: () => {
       if (!projectId) throw new Error('Project ID is required');
+      if (hasSearchConditions) {
+        return projectApi.searchProjectInjections(projectId, {
+          page: currentPage,
+          size: pageSize,
+          search: searchText || undefined,
+          sort_by:
+            normalizedSortFields.length > 0 ? normalizedSortFields : undefined,
+        });
+      }
       return projectApi.listProjectInjections(projectId, {
         page: currentPage,
         size: toPageSizeEnum(pageSize),
       });
     },
     enabled: !!projectId,
+    staleTime: 0,
   });
 
   // Transform API data to table format, with mock data fallback
@@ -529,6 +570,7 @@ const ProjectInjectionList: React.FC = () => {
         renderName={renderName}
         renderStatus={renderStatus}
         renderCell={renderCell}
+        rowColors={rowColors}
         onBackClick={handleBackToWorkspace}
         backTooltip='Back to Workspace'
         onBulkDelete={handleBulkDelete}

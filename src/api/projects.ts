@@ -4,6 +4,7 @@
  */
 import {
   type CreateProjectReq,
+  type InjectionField,
   type InjectionResp,
   type LabelItem,
   type ListProjectResp,
@@ -11,6 +12,7 @@ import {
   type ProjectDetailResp,
   type ProjectResp,
   ProjectsApi,
+  type SortDirection,
   type StatusType,
 } from '@rcabench/client';
 
@@ -62,6 +64,37 @@ export const projectApi = {
     return {
       items: response.data.data?.items || [],
       total: response.data.data?.pagination?.total || 0,
+    };
+  },
+
+  /**
+   * Search project injections with sort/filter support
+   */
+  searchProjectInjections: async (
+    projectId: number,
+    body?: {
+      page?: number;
+      size?: number;
+      search?: string;
+      sort_by?: Array<{ field: string; order: 'asc' | 'desc' }>;
+    }
+  ): Promise<{ items: InjectionResp[]; total: number }> => {
+    const api = new ProjectsApi(createApiConfig());
+    const response = await api.searchProjectInjections({
+      projectId,
+      search: {
+        name_pattern: body?.search,
+        page: body?.page,
+        size: body?.size as PageSize | undefined,
+        sort: body?.sort_by?.map((sf) => ({
+          field: sf.field as InjectionField,
+          direction: sf.order as SortDirection,
+        })),
+      },
+    });
+    return {
+      items: (response.data.data?.items ?? []) as InjectionResp[],
+      total: response.data.data?.pagination?.total ?? 0,
     };
   },
 

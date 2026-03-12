@@ -1,5 +1,6 @@
 /**
  * Project name→id mapping cache utility
+ * Persisted in localStorage so lookups survive page refreshes.
  */
 import type { ProjectResp } from '@rcabench/client';
 
@@ -9,46 +10,56 @@ export interface ProjectNameMapEntry {
   cachedAt: number;
 }
 
-/**
- * Update name→id cache from project list
- */
-export function updateProjectNameMap(
-  projects: ProjectResp[] | undefined,
-  setQueryData: (
-    key: string[],
-    data:
-      | ProjectNameMapEntry
-      | ((old: ProjectNameMapEntry | undefined) => ProjectNameMapEntry)
-  ) => void
-): void {
-  if (!projects || projects.length === 0) return;
+const STORAGE_KEY = 'aegislab_project_name_map';
+const TTL_MS = 30 * 60 * 1000; // 30 minutes
 
-  const now = Date.now();
-  projects.forEach((project) => {
-    if (project.id && project.name) {
-      setQueryData(['projectNameMap', project.name], {
-        id: project.id,
-        name: project.name,
-        cachedAt: now,
-      });
-    }
-  });
+function readMap(): Record<string, ProjectNameMapEntry> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMap(map: Record<string, ProjectNameMapEntry>): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  } catch {
+    // localStorage might be full – ignore
+  }
 }
 
 /**
- * Get project ID from cache (5min TTL)
+ * Update name→id cache from project list (persists to localStorage)
+ */
+export function updateProjectNameMap(
+  projects: ProjectResp[] | undefined
+): void {
+  if (!projects || projects.length === 0) return;
+
+  const map = readMap();
+  const now = Date.now();
+  projects.forEach((project) => {
+    if (project.id && project.name) {
+      map[project.name] = { id: project.id, name: project.name, cachedAt: now };
+    }
+  });
+  writeMap(map);
+}
+
+/**
+ * Get project ID from localStorage cache (TTL: 30 min)
  */
 export function getProjectIdFromName(
-  projectName: string | undefined,
-  getQueryData: (key: string[]) => ProjectNameMapEntry | undefined
+  projectName: string | undefined
 ): number | undefined {
   if (!projectName) return undefined;
 
-  const cached = getQueryData(['projectNameMap', projectName]);
-
-  if (cached && Date.now() - cached.cachedAt < 5 * 60 * 1000) {
-    return cached.id;
+  const map = readMap();
+  const entry = map[projectName];
+  if (entry && Date.now() - entry.cachedAt < TTL_MS) {
+    return entry.id;
   }
-
   return undefined;
 }

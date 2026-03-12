@@ -152,6 +152,7 @@ const ProjectExecutionList: React.FC = () => {
     setRunsPanelCollapsed,
     // Visibility management
     visibleRuns,
+    runColors,
     setItemsVisible,
     initializeVisibility,
   } = useWorkspaceStore();
@@ -357,6 +358,18 @@ const ProjectExecutionList: React.FC = () => {
     return getVisibleIdsFromMap(visibleRuns, 'executions');
   }, [visibleRuns]);
 
+  // Build rowColors: map numeric ID -> color (from store, no recomputation)
+  const rowColors = useMemo(() => {
+    const result: Record<number, string> = {};
+    Object.entries(runColors).forEach(([key, color]) => {
+      if (key.startsWith('exec_')) {
+        const numId = Number(key.slice(5));
+        if (!isNaN(numId)) result[numId] = color;
+      }
+    });
+    return result;
+  }, [runColors]);
+
   // Handle visibility change from table - sync to store
   const handleVisualizeChange = useCallback(
     (keys: React.Key[]) => {
@@ -380,12 +393,33 @@ const ProjectExecutionList: React.FC = () => {
 
   // Fetch executions data
   const { data: executionsData, isLoading } = useQuery({
-    queryKey: ['executions', projectName, currentPage, pageSize, searchText],
-    queryFn: () =>
-      executionApi.getExecutions({
+    queryKey: [
+      'executions',
+      projectName,
+      currentPage,
+      pageSize,
+      searchText,
+      sortFields,
+    ],
+    queryFn: () => {
+      // Use search API when sort fields are present
+      if (sortFields.length > 0) {
+        return executionApi.searchExecutions({
+          page: currentPage,
+          size: pageSize,
+          search: searchText || undefined,
+          sort_by: sortFields.map((sf) => ({
+            field: sf.field,
+            order: sf.order,
+          })),
+        });
+      }
+
+      return executionApi.getExecutions({
         page: currentPage,
         size: pageSize,
-      }),
+      });
+    },
   });
 
   // Transform API data to table format, with mock data fallback
@@ -645,6 +679,7 @@ const ProjectExecutionList: React.FC = () => {
         renderName={renderName}
         renderStatus={renderStatus}
         renderCell={renderCell}
+        rowColors={rowColors}
         statusField='state'
         onBackClick={handleBackToWorkspace}
         backTooltip='Back to Workspace'

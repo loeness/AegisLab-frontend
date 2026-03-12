@@ -19,6 +19,8 @@ import type {
   RunsDataSource,
   SortField,
 } from '@/types/workspace';
+import { getColor } from '@/utils/colors';
+import { fromRunId } from '@/utils/idUtils';
 
 import ColumnManager from './ColumnManager';
 import GroupDropdown from './GroupDropdown';
@@ -319,21 +321,35 @@ const RunsPanel: React.FC<RunsPanelProps> = ({
             <Text type='secondary'>No {dataSource} found</Text>
           </div>
         ) : (
-          processedRuns.map((run) => (
-            <RunListItem
-              key={run.id}
-              id={run.id}
-              name={run.name}
-              status={run.status}
-              color={runColors[run.id]}
-              isVisible={visibleRuns[run.id]}
-              isSelected={selectedRuns.includes(run.id)}
-              showCheckbox={false}
-              cropMode={cropMode}
-              onVisibilityChange={() => onToggleVisibility(run.id)}
-              onClick={() => onSelectRun(run.id)}
-            />
-          ))
+          processedRuns.map((run) => {
+            // Read stored color first; fall back to palette if not yet initialized
+            const storedColor = runColors[run.id];
+            const resolvedColor =
+              storedColor ??
+              (() => {
+                try {
+                  return getColor(fromRunId(run.id).id);
+                } catch {
+                  return getColor(0);
+                }
+              })();
+
+            return (
+              <RunListItem
+                key={run.id}
+                id={run.id}
+                name={run.name}
+                status={run.status}
+                color={resolvedColor}
+                isVisible={visibleRuns[run.id]}
+                isSelected={selectedRuns.includes(run.id)}
+                showCheckbox={false}
+                cropMode={cropMode}
+                onVisibilityChange={() => onToggleVisibility(run.id)}
+                onClick={() => onSelectRun(run.id)}
+              />
+            );
+          })
         )}
       </div>
 

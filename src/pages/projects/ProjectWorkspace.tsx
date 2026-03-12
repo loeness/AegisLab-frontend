@@ -19,7 +19,7 @@ import type {
   RunStatus,
   SharedTableSettings,
 } from '@/types/workspace';
-import { toRunId } from '@/utils/idUtils';
+import { fromRunId, toRunId } from '@/utils/idUtils';
 
 import './ProjectWorkspace.css';
 
@@ -159,8 +159,6 @@ const ProjectWorkspace: React.FC = () => {
     selectedRuns,
     toggleItemVisibility,
     initializeVisibility,
-    selectRun,
-    deselectRun,
     // Table settings for pagination sync
     injectionsTableSettings,
     executionsTableSettings,
@@ -209,7 +207,7 @@ const ProjectWorkspace: React.FC = () => {
   const apiInjections = useMemo((): Run[] => {
     if (!injectionsData?.items) return [];
     return injectionsData.items.map((item) => ({
-      id: String(item.id),
+      id: toRunId('injections', item.id ?? 0),
       name: item.name ?? `Injection #${item.id}`,
       status: (item.state ? String(item.state) : 'unknown') as RunStatus,
       created_at: item.created_at ?? new Date().toISOString(),
@@ -290,17 +288,14 @@ const ProjectWorkspace: React.FC = () => {
 
   const handleSelectRun = useCallback(
     (runId: string) => {
-      // Convert to store format
-      const numericId = Number(runId.split('_')[1]);
-      const storeId = toRunId(runsDataSource, numericId);
-
-      if (selectedRuns.includes(storeId)) {
-        deselectRun(storeId);
+      const { id: numericId, dataSource: runDataSource } = fromRunId(runId);
+      if (runDataSource === 'injections') {
+        navigate(`/${teamName}/${projectName}/injections/${numericId}`);
       } else {
-        selectRun(storeId);
+        navigate(`/${teamName}/${projectName}/executions/${numericId}`);
       }
     },
-    [runsDataSource, selectedRuns, selectRun, deselectRun]
+    [navigate, teamName, projectName]
   );
 
   const handlePageChange = useCallback(
@@ -366,6 +361,7 @@ const ProjectWorkspace: React.FC = () => {
           runs={paginatedRuns}
           totalRuns={filteredRuns.length}
           visibleRuns={visibleRunsForPanel}
+          runColors={runColors}
           selectedRuns={selectedRunsForPanel}
           page={page}
           pageSize={pageSize}

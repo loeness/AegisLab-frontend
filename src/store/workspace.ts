@@ -16,7 +16,9 @@ import {
   type Workspace,
   type WorkspaceSettings,
 } from '@/types/workspace';
+import { getColor } from '@/utils/colors';
 import {
+  fromRunId,
   fromRunIds,
   getVisibleRunIdsFromMap,
   toRunId,
@@ -185,8 +187,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             newVisibleRuns[run.id] = index < 5;
           }
           if (!(run.id in newRunColors)) {
-            newRunColors[run.id] =
-              DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+            // Parse numeric ID from prefixed run ID (e.g. 'inj_1' -> 1)
+            try {
+              const { id: numericId } = fromRunId(run.id);
+              newRunColors[run.id] = getColor(numericId);
+            } catch {
+              newRunColors[run.id] = getColor(index);
+            }
           }
         });
 
@@ -488,7 +495,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           newVisibleRuns[runId] = index < defaultVisibleCount;
           // Assign colors
           if (!(runId in newRunColors)) {
-            newRunColors[runId] = DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+            // Use the actual numeric ID for consistent palette lookup
+            try {
+              const { id: numericId } = fromRunId(runId);
+              newRunColors[runId] = getColor(numericId);
+            } catch {
+              newRunColors[runId] = getColor(index);
+            }
           }
         });
 

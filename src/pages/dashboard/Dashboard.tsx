@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   const { data: injections } = useQuery({
     queryKey: ['injections', { page: 1, size: 10 }],
-    queryFn: () => injectionApi.getInjections({ page: 1, size: 10 }),
+    queryFn: () => injectionApi.listInjections({ page: 1, size: 10 }),
   });
 
   const { data: executions } = useQuery({

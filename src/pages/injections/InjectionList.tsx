@@ -79,7 +79,7 @@ const InjectionList = () => {
       searchText,
     ],
     queryFn: () =>
-      injectionApi.getInjections({
+      injectionApi.listInjections({
         page: pagination.current,
         size: pagination.pageSize,
       }),

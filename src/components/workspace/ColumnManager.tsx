@@ -57,12 +57,23 @@ const ColumnManager: FC<ColumnManagerProps> = ({
   onHideUnpinned,
 }) => {
   const [searchText, setSearchText] = useState('');
-  const [searchMode, setSearchMode] = useState<'fuzzy' | 'exact'>('fuzzy');
+  const [searchMode, setSearchMode] = useState<'fuzzy' | 'exact' | 'regexp'>(
+    'fuzzy'
+  );
 
   // Filter columns by search text
   const filterColumns = useCallback(
     (cols: ColumnConfig[]) => {
       if (!searchText) return cols;
+      if (searchMode === 'regexp') {
+        try {
+          const regex = new RegExp(searchText, 'i');
+          return cols.filter((col) => regex.test(col.title));
+        } catch {
+          // Invalid regex, fall back to no filter
+          return cols;
+        }
+      }
       const lowerSearch = searchText.toLowerCase();
       return cols.filter((col) => {
         if (searchMode === 'exact') {
@@ -197,6 +208,7 @@ const ColumnManager: FC<ColumnManagerProps> = ({
             options={[
               { value: 'fuzzy', label: 'Fuzzy' },
               { value: 'exact', label: 'Exact' },
+              { value: 'regexp', label: 'RegExp' },
             ]}
           />
         </div>

@@ -65,7 +65,9 @@ dayjs.extend(relativeTime);
 
 const { Text } = Typography;
 
-export interface WorkspaceTableProps<T extends { id: number | string }> {
+export interface WorkspaceTableProps<
+  T extends { id: number | string; children?: T[] },
+> {
   // Data
   dataSource: T[];
   loading?: boolean;
@@ -119,6 +121,9 @@ export interface WorkspaceTableProps<T extends { id: number | string }> {
   onBackClick?: () => void;
   backTooltip?: string;
 
+  // Row colors (synced with RunsPanel; if not provided, falls back to getColor)
+  rowColors?: Record<string | number, string>;
+
   // Custom renderers
   renderStatus?: (record: T) => ReactNode;
   renderName?: (record: T) => ReactNode;
@@ -137,7 +142,35 @@ export interface WorkspaceTableProps<T extends { id: number | string }> {
 const generateSortKey = () =>
   `sort-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-function WorkspaceTable<T extends { id: number | string }>({
+// Recursively collect all IDs from a tree structure
+function collectAllIds<T extends { id: number | string; children?: T[] }>(
+  data: T[]
+): Array<number | string> {
+  return data.flatMap((item) => [
+    item.id,
+    ...collectAllIds(item.children || []),
+  ]);
+}
+
+// Recursively filter tree data – keep a node if it or any descendant is in the ids set
+function filterTreeByIds<T extends { id: number | string; children?: T[] }>(
+  data: T[],
+  ids: Array<number | string>
+): T[] {
+  return data.reduce<T[]>((acc, item) => {
+    const filteredChildren = filterTreeByIds(item.children || [], ids);
+    if (ids.includes(item.id) || filteredChildren.length > 0) {
+      acc.push({
+        ...item,
+        children:
+          filteredChildren.length > 0 ? filteredChildren : item.children,
+      });
+    }
+    return acc;
+  }, []);
+}
+
+function WorkspaceTable<T extends { id: number | string; children?: T[] }>({
   dataSource,
   loading = false,
   total,
@@ -171,6 +204,7 @@ function WorkspaceTable<T extends { id: number | string }>({
   renderStatus,
   renderName,
   renderCell,
+  rowColors,
   toolbarExtra,
   onBulkDelete,
   onBulkAddTags,
@@ -191,14 +225,15 @@ function WorkspaceTable<T extends { id: number | string }>({
     onColumnsChange,
   });
 
-  // Filter data when showOnlyVisualized is enabled
+  // Filter data when showOnlyVisualized is enabled (supports tree data)
   const filteredDataSource = useMemo(() => {
     if (
       showOnlyVisualized &&
       visualizedRowKeys &&
       visualizedRowKeys.length > 0
     ) {
-      return dataSource.filter((d) => visualizedRowKeys.includes(d.id));
+      const idSet = visualizedRowKeys as Array<number | string>;
+      return filterTreeByIds(dataSource, idSet);
     }
     return dataSource;
   }, [dataSource, showOnlyVisualized, visualizedRowKeys]);
@@ -365,6 +400,9 @@ function WorkspaceTable<T extends { id: number | string }>({
   const antColumns: ColumnsType<T> = useMemo(() => {
     const result: ColumnsType<T> = [];
 
+    // Collect all IDs including children (for select-all in tree mode)
+    const allIds = collectAllIds(dataSource);
+
     // Checkbox column (if selection enabled)
     if (onSelectChange) {
       result.push({
@@ -372,15 +410,15 @@ function WorkspaceTable<T extends { id: number | string }>({
           <Checkbox
             checked={
               selectedRowKeys.length > 0 &&
-              selectedRowKeys.length === dataSource.length
+              selectedRowKeys.length === allIds.length
             }
             indeterminate={
               selectedRowKeys.length > 0 &&
-              selectedRowKeys.length < dataSource.length
+              selectedRowKeys.length < allIds.length
             }
             onChange={(e) => {
               if (e.target.checked) {
-                onSelectChange(dataSource.map((d) => d.id));
+                onSelectChange(allIds);
               } else {
                 onSelectChange([]);
               }
@@ -598,7 +636,12 @@ function WorkspaceTable<T extends { id: number | string }>({
           // Name column: render with eye icon and status dot
           if (col.key === 'name') {
             const isVisible = visualizedRowKeys?.includes(record.id);
-            const id = record.id as number; // Assuming ID is number for color assignment
+            const numericId = Number(record.id);
+            // rowColors (from parent/store) takes priority, then palette-based color
+            const dotColor =
+              rowColors?.[record.id] ??
+              rowColors?.[numericId] ??
+              getColor(numericId);
             const nameValue = value as string;
 
             // Apply crop mode for non-'end' modes (CSS handles 'end' mode)
@@ -625,7 +668,7 @@ function WorkspaceTable<T extends { id: number | string }>({
                 )}
                 <span
                   className='status-dot'
-                  style={{ backgroundColor: getColor(id) }}
+                  style={{ backgroundColor: dotColor }}
                 />
                 {renderName ? (
                   renderName(record)
@@ -675,6 +718,7 @@ function WorkspaceTable<T extends { id: number | string }>({
     sortOrder,
     setCropMode,
     setSortOrder,
+    rowColors,
   ]);
 
   return (
@@ -716,6 +760,11 @@ function WorkspaceTable<T extends { id: number | string }>({
           rowKey='id'
           pagination={false}
           scroll={{ x: 'max-content' }}
+          expandable={{
+            defaultExpandAllRows: false,
+            rowExpandable: (record) =>
+              !!record.children && record.children.length > 0,
+          }}
           onRow={(record) => ({
             onClick: () => onRowClick?.(record),
             className: 'table-row',
