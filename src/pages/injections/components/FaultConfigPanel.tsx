@@ -134,7 +134,9 @@ export const FaultConfigPanel: React.FC<FaultConfigPanelProps> = ({
           {param.label}
           {param.description && (
             <Tooltip title={param.description}>
-              <InfoCircleOutlined style={{ marginLeft: 8, color: '#8c8c8c' }} />
+              <InfoCircleOutlined
+                style={{ marginLeft: 8, color: 'var(--color-secondary-400)' }}
+              />
             </Tooltip>
           )}
         </span>

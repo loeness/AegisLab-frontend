@@ -68,7 +68,7 @@ const ContainerList = () => {
         record.name?.toLowerCase().includes((value as string).toLowerCase()) ??
         false,
       render: (text: string) => (
-        <Typography.Text strong style={{ color: '#2563eb' }}>
+        <Typography.Text strong style={{ color: 'var(--color-primary-600)' }}>
           {text}
         </Typography.Text>
       ),
@@ -169,7 +169,7 @@ const ContainerList = () => {
           marginBottom: '24px',
         }}
       >
-        <Title level={3} className='page-title' style={{ margin: 0 }}>
+        <Title level={4} className='page-title' style={{ margin: 0 }}>
           Containers
         </Title>
         <Space>

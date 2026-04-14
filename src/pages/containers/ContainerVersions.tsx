@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
@@ -24,8 +27,6 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 
 import { containerApi } from '@/api/containers';
 
@@ -44,9 +45,8 @@ const ContainerVersions = () => {
   const { id } = useParams<{ id: string }>();
   const containerId = Number(id);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingVersion, setEditingVersion] = useState<ContainerVersionResp | null>(
-    null
-  );
+  const [editingVersion, setEditingVersion] =
+    useState<ContainerVersionResp | null>(null);
   const [form] = Form.useForm<VersionFormData>();
 
   // Fetch container details
@@ -168,7 +168,10 @@ const ContainerVersions = () => {
       render: (name: string) => (
         <Badge
           count={name}
-          style={{ backgroundColor: '#3b82f6', fontWeight: 'bold' }}
+          style={{
+            backgroundColor: 'var(--color-primary-500)',
+            fontWeight: 'bold',
+          }}
         />
       ),
     },
@@ -189,9 +192,7 @@ const ContainerVersions = () => {
       dataIndex: 'usage',
       key: 'usage',
       width: 100,
-      render: (usage?: number) => (
-        <Tag color='blue'>{usage ?? 0}</Tag>
-      ),
+      render: (usage?: number) => <Tag color='blue'>{usage ?? 0}</Tag>,
     },
     {
       title: '更新时间',
@@ -251,7 +252,7 @@ const ContainerVersions = () => {
           >
             返回容器详情
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             {container?.name} - 版本管理
           </Title>
         </Space>
@@ -320,16 +321,13 @@ const ContainerVersions = () => {
           </Form.Item>
 
           <Form.Item label='启动命令（可选）' name='command'>
-            <TextArea
-              rows={3}
-              placeholder='容器启动命令或参数'
-            />
+            <TextArea rows={3} placeholder='容器启动命令或参数' />
           </Form.Item>
 
           <div
             style={{
               padding: 12,
-              background: '#f5f5f5',
+              background: 'var(--color-bg-secondary)',
               borderRadius: 4,
               marginTop: 16,
             }}

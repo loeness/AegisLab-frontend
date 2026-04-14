@@ -51,7 +51,7 @@ const TeamDetailPage = () => {
 
   // Add member mutation
   const addMemberMutation = useMutation({
-    mutationFn: (data: { email: string; role_id: number }) =>
+    mutationFn: (data: { username: string; role_id: number }) =>
       teamApi.addMember(team?.id || 0, data),
     onSuccess: () => {
       message.success('Member invited successfully');
@@ -64,7 +64,10 @@ const TeamDetailPage = () => {
     },
   });
 
-  const handleInviteSubmit = (values: { email: string; role_id: number }) => {
+  const handleInviteSubmit = (values: {
+    username: string;
+    role_id: number;
+  }) => {
     addMemberMutation.mutate(values);
   };
 
@@ -191,14 +194,11 @@ const TeamDetailPage = () => {
       >
         <Form form={inviteForm} layout='vertical' onFinish={handleInviteSubmit}>
           <Form.Item
-            name='email'
-            label='Email Address'
-            rules={[
-              { required: true, message: 'Please enter the user email' },
-              { type: 'email', message: 'Please enter a valid email' },
-            ]}
+            name='username'
+            label='Username'
+            rules={[{ required: true, message: 'Please enter the username' }]}
           >
-            <Input placeholder='user@example.com' />
+            <Input placeholder='username' />
           </Form.Item>
           <Form.Item
             name='role_id'

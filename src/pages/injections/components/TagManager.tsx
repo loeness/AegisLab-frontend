@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 
 import {
   InfoCircleOutlined,
@@ -6,7 +7,6 @@ import {
 } from '@ant-design/icons';
 import { Button, Form, Input, message, Space, Tag, Tooltip } from 'antd';
 import type { InputRef } from 'antd/es/input';
-import { useEffect, useRef, useState } from 'react';
 
 import './TagManager.css';
 
@@ -113,7 +113,6 @@ export const TagManager: React.FC<TagManagerProps> = ({
     }
   };
 
-
   const handleQuickAdd = (tag: string) => {
     if (value.indexOf(tag) === -1) {
       onChange([...value, tag]);
@@ -149,7 +148,9 @@ export const TagManager: React.FC<TagManagerProps> = ({
           <TagsOutlined />
           <span>Tags</span>
           <Tooltip title='Add tags to categorize and search for this injection'>
-            <InfoCircleOutlined style={{ color: '#8c8c8c' }} />
+            <InfoCircleOutlined
+              style={{ color: 'var(--color-secondary-400)' }}
+            />
           </Tooltip>
         </Space>
       }

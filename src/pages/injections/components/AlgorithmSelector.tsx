@@ -1,3 +1,4 @@
+import { useState } from 'react';
 
 import { InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import type { ContainerResp } from '@rcabench/client';
@@ -12,7 +13,6 @@ import {
   Tag,
   Tooltip,
 } from 'antd';
-import { useState } from 'react';
 
 import './AlgorithmSelector.css';
 
@@ -77,7 +77,9 @@ export const AlgorithmSelector: React.FC<AlgorithmSelectorProps> = ({
           <Space>
             <span>Algorithm Containers</span>
             <Tooltip title='Select RCA algorithms to run during the experiment'>
-              <InfoCircleOutlined style={{ color: '#8c8c8c' }} />
+              <InfoCircleOutlined
+                style={{ color: 'var(--color-secondary-400)' }}
+              />
             </Tooltip>
             <Button
               type='link'
@@ -137,7 +139,8 @@ export const AlgorithmSelector: React.FC<AlgorithmSelectorProps> = ({
                 <Button
                   key='select'
                   type={
-                    algorithm.id !== undefined && selectedAlgorithms.includes(algorithm.id)
+                    algorithm.id !== undefined &&
+                    selectedAlgorithms.includes(algorithm.id)
                       ? 'default'
                       : 'primary'
                   }
@@ -153,7 +156,8 @@ export const AlgorithmSelector: React.FC<AlgorithmSelectorProps> = ({
                     }
                   }}
                 >
-                  {algorithm.id !== undefined && selectedAlgorithms.includes(algorithm.id)
+                  {algorithm.id !== undefined &&
+                  selectedAlgorithms.includes(algorithm.id)
                     ? 'Remove'
                     : 'Select'}
                 </Button>,

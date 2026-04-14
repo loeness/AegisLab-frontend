@@ -272,19 +272,27 @@ const TaskList = () => {
 
     switch (taskType) {
       case ListTasksTaskType.NUMBER_0: // BuildContainer
-        return <FunctionOutlined style={{ color: '#3b82f6' }} />;
+        return (
+          <FunctionOutlined style={{ color: 'var(--color-primary-500)' }} />
+        );
       case ListTasksTaskType.NUMBER_1: // RestartPedestal
-        return <SyncOutlined style={{ color: '#10b981' }} />;
+        return <SyncOutlined style={{ color: 'var(--color-success)' }} />;
       case ListTasksTaskType.NUMBER_2: // FaultInjection
-        return <SyncOutlined style={{ color: '#f59e0b' }} />;
+        return <SyncOutlined style={{ color: 'var(--color-warning)' }} />;
       case ListTasksTaskType.NUMBER_3: // RunAlgorithm
-        return <FunctionOutlined style={{ color: '#ec4899' }} />;
+        return <FunctionOutlined style={{ color: 'var(--color-info)' }} />;
       case ListTasksTaskType.NUMBER_4: // BuildDatapack
-        return <DashboardOutlined style={{ color: '#10b981' }} />;
+        return <DashboardOutlined style={{ color: 'var(--color-success)' }} />;
       case ListTasksTaskType.NUMBER_5: // CollectResult
-        return <DatabaseOutlined style={{ color: '#8b5cf6' }} />;
+        return (
+          <DatabaseOutlined style={{ color: 'var(--color-primary-700)' }} />
+        );
       case ListTasksTaskType.NUMBER_6: // CronJob
-        return <ClockCircleOutlined style={{ color: '#6b7280' }} />;
+        return (
+          <ClockCircleOutlined
+            style={{ color: 'var(--color-secondary-500)' }}
+          />
+        );
       default:
         return <ClockCircleOutlined />;
     }
@@ -293,7 +301,8 @@ const TaskList = () => {
   const getTaskTypeColor = (
     type: ListTasksTaskType | string | undefined
   ): string => {
-    if (type === undefined || type === null) return '#6b7280';
+    if (type === undefined || type === null)
+      return 'var(--color-secondary-500)';
 
     const taskType =
       typeof type === 'string'
@@ -304,38 +313,38 @@ const TaskList = () => {
 
     switch (taskType) {
       case ListTasksTaskType.NUMBER_0: // BuildContainer
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case ListTasksTaskType.NUMBER_1: // RestartPedestal
-        return '#10b981';
+        return 'var(--color-success)';
       case ListTasksTaskType.NUMBER_2: // FaultInjection
-        return '#f59e0b';
+        return 'var(--color-warning)';
       case ListTasksTaskType.NUMBER_3: // RunAlgorithm
-        return '#ec4899';
+        return 'var(--color-info)';
       case ListTasksTaskType.NUMBER_4: // BuildDatapack
-        return '#10b981';
+        return 'var(--color-success)';
       case ListTasksTaskType.NUMBER_5: // CollectResult
-        return '#8b5cf6';
+        return 'var(--color-primary-700)';
       case ListTasksTaskType.NUMBER_6: // CronJob
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
   const getStateColor = (state: TaskState) => {
     switch (state) {
       case TaskState.Pending: // PENDING
-        return '#d1d5db';
+        return 'var(--color-secondary-300)';
       case TaskState.Running: // RUNNING
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case TaskState.Completed: // COMPLETED
-        return '#10b981';
+        return 'var(--color-success)';
       case TaskState.Error: // ERROR
-        return '#ef4444';
+        return 'var(--color-error)';
       case TaskState.Cancelled: // CANCELLED
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
@@ -493,7 +502,10 @@ const TaskList = () => {
         if (isRunning) {
           return (
             <Space size='small'>
-              <SyncOutlined spin style={{ color: '#3b82f6' }} />
+              <SyncOutlined
+                spin
+                style={{ color: 'var(--color-primary-500)' }}
+              />
               <Text type='secondary' style={{ fontSize: '0.75rem' }}>
                 Running
               </Text>
@@ -582,7 +594,7 @@ const TaskList = () => {
       {/* Page Header */}
       <div className='page-header'>
         <div className='page-header-left'>
-          <Title level={2} className='page-title'>
+          <Title level={4} className='page-title'>
             Task Monitor
           </Title>
           <Text type='secondary'>
@@ -619,7 +631,7 @@ const TaskList = () => {
               title='Total Tasks'
               value={stats.total}
               prefix={<DashboardOutlined />}
-              valueStyle={{ color: '#3b82f6' }}
+              valueStyle={{ color: 'var(--color-primary-500)' }}
             />
           </Card>
         </Col>
@@ -629,7 +641,7 @@ const TaskList = () => {
               title='Pending'
               value={stats.pending}
               prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#6b7280' }}
+              valueStyle={{ color: 'var(--color-secondary-500)' }}
             />
           </Card>
         </Col>
@@ -639,7 +651,7 @@ const TaskList = () => {
               title='Running'
               value={stats.running}
               prefix={<SyncOutlined />}
-              valueStyle={{ color: '#3b82f6' }}
+              valueStyle={{ color: 'var(--color-primary-500)' }}
             />
           </Card>
         </Col>
@@ -649,7 +661,7 @@ const TaskList = () => {
               title='Completed'
               value={stats.completed}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#10b981' }}
+              valueStyle={{ color: 'var(--color-success)' }}
             />
           </Card>
         </Col>
@@ -659,7 +671,7 @@ const TaskList = () => {
               title='Error'
               value={stats.error}
               prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: '#ef4444' }}
+              valueStyle={{ color: 'var(--color-error)' }}
             />
           </Card>
         </Col>
@@ -669,7 +681,7 @@ const TaskList = () => {
               title='Cancelled'
               value={stats.cancelled}
               prefix={<PauseCircleOutlined />}
-              valueStyle={{ color: '#6b7280' }}
+              valueStyle={{ color: 'var(--color-secondary-500)' }}
             />
           </Card>
         </Col>

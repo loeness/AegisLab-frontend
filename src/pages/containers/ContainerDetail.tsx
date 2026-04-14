@@ -195,7 +195,10 @@ const ContainerDetail = () => {
       render: (version: string) => (
         <Badge
           count={version}
-          style={{ backgroundColor: '#3b82f6', fontWeight: 'bold' }}
+          style={{
+            backgroundColor: 'var(--color-primary-500)',
+            fontWeight: 'bold',
+          }}
         />
       ),
     },
@@ -298,7 +301,7 @@ const ContainerDetail = () => {
           >
             返回列表
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             {container.name}
           </Title>
         </Space>
@@ -410,8 +413,11 @@ const ContainerDetail = () => {
                           <Text type='secondary'>版本总数</Text>
                           <br />
                           <Title
-                            level={3}
-                            style={{ margin: 0, color: '#3b82f6' }}
+                            level={5}
+                            style={{
+                              margin: 0,
+                              color: 'var(--color-primary-500)',
+                            }}
                           >
                             {versions.length}
                           </Title>

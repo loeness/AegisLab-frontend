@@ -45,9 +45,9 @@ const EvaluationDetail = () => {
   });
 
   const getMetricColor = (value: number) => {
-    if (value >= 0.9) return '#10b981';
-    if (value >= 0.7) return '#f59e0b';
-    return '#ef4444';
+    if (value >= 0.9) return 'var(--color-success)';
+    if (value >= 0.7) return 'var(--color-warning)';
+    return 'var(--color-error)';
   };
 
   const handleExportResults = () => {
@@ -164,7 +164,7 @@ const EvaluationDetail = () => {
             Back to Evaluations
           </Button>
         </Space>
-        <Title level={2} style={{ marginTop: 16, marginBottom: 0 }}>
+        <Title level={4} style={{ marginTop: 16, marginBottom: 0 }}>
           <BarChartOutlined style={{ marginRight: 8 }} />
           Evaluation Details
         </Title>
@@ -180,14 +180,16 @@ const EvaluationDetail = () => {
             <Descriptions title='Evaluation Information' column={1}>
               <Descriptions.Item label='Algorithm'>
                 <Space>
-                  <FunctionOutlined style={{ color: '#f59e0b' }} />
+                  <FunctionOutlined style={{ color: 'var(--color-warning)' }} />
                   <Text strong>{evaluation.algorithm}</Text>
                   <Text type='secondary'>v{evaluation.algorithm_version}</Text>
                 </Space>
               </Descriptions.Item>
               <Descriptions.Item label='Datapack'>
                 <Space>
-                  <DatabaseOutlined style={{ color: '#3b82f6' }} />
+                  <DatabaseOutlined
+                    style={{ color: 'var(--color-primary-500)' }}
+                  />
                   <Text code>{evaluation.datapack}</Text>
                 </Space>
               </Descriptions.Item>

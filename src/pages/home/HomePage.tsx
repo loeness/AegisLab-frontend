@@ -2,8 +2,6 @@ import { useNavigate } from 'react-router-dom';
 
 import {
   ArrowRightOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   ExperimentOutlined,
   FolderOutlined,
   PlusOutlined,
@@ -22,6 +20,7 @@ import {
   Row,
   Skeleton,
   Space,
+  Spin,
   Statistic,
   Typography,
 } from 'antd';
@@ -63,11 +62,6 @@ const HomePage: React.FC = () => {
     queryFn: () => metricsApi.getExecutionMetrics(),
   });
 
-  const { data: algorithmMetrics } = useQuery({
-    queryKey: ['metrics', 'algorithms'],
-    queryFn: () => metricsApi.getAlgorithmMetrics(),
-  });
-
   // Fetch system status
   const { data: systemMetrics } = useQuery({
     queryKey: ['system', 'metrics'],
@@ -90,7 +84,7 @@ const HomePage: React.FC = () => {
     <div className='home-page'>
       {/* Welcome Section */}
       <div className='welcome-section'>
-        <Title level={2}>Welcome back, {user?.username || 'User'}</Title>
+        <Title level={4}>Welcome back, {user?.username || 'User'}</Title>
         <Paragraph type='secondary'>
           Manage your RCA benchmarking projects and experiments
         </Paragraph>
@@ -117,9 +111,9 @@ const HomePage: React.FC = () => {
         </Space>
       </Card>
 
-      {/* Metrics Cards */}
+      {/* Metrics Cards — 3 cards: Injections, Executions, System Status */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title='Total Injections'
@@ -128,7 +122,7 @@ const HomePage: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title='Total Executions'
@@ -137,16 +131,7 @@ const HomePage: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title='Algorithms'
-              value={algorithmMetrics?.total ?? '-'}
-              prefix={<RocketOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Space direction='vertical' size={4}>
               <Text type='secondary'>System Status</Text>
@@ -160,10 +145,7 @@ const HomePage: React.FC = () => {
                   }
                 />
               ) : (
-                <Badge
-                  status='default'
-                  text={<Text type='secondary'>Loading...</Text>}
-                />
+                <Badge status='default' text={<Spin size='small' />} />
               )}
               {systemMetrics?.cpu_usage != null && (
                 <Text type='secondary' style={{ fontSize: 12 }}>
@@ -176,45 +158,9 @@ const HomePage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Execution Metrics Summary */}
-      {executionMetrics && (
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={8}>
-            <Card size='small'>
-              <Statistic
-                title='Completed'
-                value={executionMetrics.completed ?? 0}
-                valueStyle={{ color: '#52c41a' }}
-                prefix={<CheckCircleOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card size='small'>
-              <Statistic
-                title='Running'
-                value={executionMetrics.running ?? 0}
-                valueStyle={{ color: '#1890ff' }}
-                prefix={<ThunderboltOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card size='small'>
-              <Statistic
-                title='Failed'
-                value={executionMetrics.failed ?? 0}
-                valueStyle={{ color: '#ff4d4f' }}
-                prefix={<CloseCircleOutlined />}
-              />
-            </Card>
-          </Col>
-        </Row>
-      )}
-
       <Row gutter={[24, 24]}>
         {/* Recent Projects */}
-        <Col xs={24} lg={16}>
+        <Col xs={24} lg={recentProjects.length === 0 ? 16 : 24}>
           <Card
             title={
               <Space>
@@ -294,46 +240,48 @@ const HomePage: React.FC = () => {
           </Card>
         </Col>
 
-        {/* Getting Started */}
-        <Col xs={24} lg={8}>
-          <Card
-            title={
-              <Space>
-                <RocketOutlined />
-                <span>Getting Started</span>
+        {/* Getting Started — only shown when user has no projects */}
+        {recentProjects.length === 0 && (
+          <Col xs={24} lg={8}>
+            <Card
+              title={
+                <Space>
+                  <RocketOutlined />
+                  <span>Getting Started</span>
+                </Space>
+              }
+            >
+              <Space direction='vertical' style={{ width: '100%' }}>
+                <div className='getting-started-item'>
+                  <Text strong>1. Create a Project</Text>
+                  <br />
+                  <Text type='secondary'>
+                    Projects help organize your experiments
+                  </Text>
+                </div>
+                <div className='getting-started-item'>
+                  <Text strong>2. Create Injections</Text>
+                  <br />
+                  <Text type='secondary'>
+                    Configure fault injection scenarios
+                  </Text>
+                </div>
+                <div className='getting-started-item'>
+                  <Text strong>3. Run Executions</Text>
+                  <br />
+                  <Text type='secondary'>
+                    Execute RCA algorithms on your data
+                  </Text>
+                </div>
+                <div className='getting-started-item'>
+                  <Text strong>4. Analyze Results</Text>
+                  <br />
+                  <Text type='secondary'>Review artifacts and evaluations</Text>
+                </div>
               </Space>
-            }
-          >
-            <Space direction='vertical' style={{ width: '100%' }}>
-              <div className='getting-started-item'>
-                <Text strong>1. Create a Project</Text>
-                <br />
-                <Text type='secondary'>
-                  Projects help organize your experiments
-                </Text>
-              </div>
-              <div className='getting-started-item'>
-                <Text strong>2. Create Injections</Text>
-                <br />
-                <Text type='secondary'>
-                  Configure fault injection scenarios
-                </Text>
-              </div>
-              <div className='getting-started-item'>
-                <Text strong>3. Run Executions</Text>
-                <br />
-                <Text type='secondary'>
-                  Execute RCA algorithms on your data
-                </Text>
-              </div>
-              <div className='getting-started-item'>
-                <Text strong>4. Analyze Results</Text>
-                <br />
-                <Text type='secondary'>Review artifacts and evaluations</Text>
-              </div>
-            </Space>
-          </Card>
-        </Col>
+            </Card>
+          </Col>
+        )}
       </Row>
     </div>
   );

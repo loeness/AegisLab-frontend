@@ -27,9 +27,7 @@ import {
   DetailView,
   type DetailViewAction,
   type DetailViewTab,
-  type DetectorResult,
   FilesTab,
-  type GranularityResult,
   LogsTab,
   type OverviewField,
   OverviewTab,
@@ -74,7 +72,7 @@ const ProjectExecutionDetail: React.FC = () => {
 
   // Get status color
   const getStatusColor = (state?: string): string => {
-    if (!state) return '#8c8c8c';
+    if (!state) return 'var(--color-secondary-400)';
     const normalizedState = state.toLowerCase();
     if (normalizedState in STATE_COLORS) {
       return STATE_COLORS[normalizedState as keyof typeof STATE_COLORS];
@@ -82,7 +80,7 @@ const ProjectExecutionDetail: React.FC = () => {
     if (normalizedState === 'crashed') {
       return STATE_COLORS.failed;
     }
-    return '#8c8c8c';
+    return 'var(--color-secondary-400)';
   };
 
   // Calculate runtime
@@ -121,7 +119,7 @@ const ProjectExecutionDetail: React.FC = () => {
       content: (
         <pre
           style={{
-            background: '#f5f5f5',
+            background: 'var(--color-secondary-100)',
             padding: 16,
             borderRadius: 6,
             maxHeight: 480,
@@ -217,7 +215,7 @@ const ProjectExecutionDetail: React.FC = () => {
         label: 'Algorithm',
         value: (
           <Space>
-            <FunctionOutlined style={{ color: '#f59e0b' }} />
+            <FunctionOutlined style={{ color: 'var(--color-warning)' }} />
             <Text strong>{execution.algorithm_name}</Text>
           </Space>
         ),
@@ -230,7 +228,7 @@ const ProjectExecutionDetail: React.FC = () => {
         label: 'Datapack ID',
         value: (
           <Space>
-            <DatabaseOutlined style={{ color: '#3b82f6' }} />
+            <DatabaseOutlined style={{ color: 'var(--color-primary-500)' }} />
             <Text code>
               {execution.datapack_id
                 ? String(execution.datapack_id).substring(0, 16)
@@ -285,7 +283,13 @@ const ProjectExecutionDetail: React.FC = () => {
       content: execution?.datapack_id ? (
         <FilesTab injectionId={execution.datapack_id} />
       ) : (
-        <div style={{ padding: 24, textAlign: 'center', color: '#8c8c8c' }}>
+        <div
+          style={{
+            padding: 24,
+            textAlign: 'center',
+            color: 'var(--color-secondary-400)',
+          }}
+        >
           No files available for this execution.
         </div>
       ),
@@ -296,12 +300,8 @@ const ProjectExecutionDetail: React.FC = () => {
       icon: <ExperimentOutlined />,
       content: (
         <ArtifactsTab
-          detectorResults={
-            execution?.detector_results as DetectorResult[] | undefined
-          }
-          granularityResults={
-            execution?.granularity_results as GranularityResult[] | undefined
-          }
+          detectorResults={execution?.detector_results}
+          granularityResults={execution?.granularity_results}
           loading={isLoading}
           onDownload={handleDownloadResults}
         />
@@ -318,7 +318,7 @@ const ProjectExecutionDetail: React.FC = () => {
           : executionFromState?.name ||
             (executionFromState?.id
               ? `exec_${String(executionFromState.id).padStart(3, '0')}`
-              : 'Loading...')
+              : '—')
       }
       titleDotColor={getStatusColor(
         execution?.state || executionFromState?.state

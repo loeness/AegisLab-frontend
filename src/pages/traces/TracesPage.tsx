@@ -137,7 +137,10 @@ const TracesPage: React.FC = () => {
       width: 220,
       ellipsis: true,
       render: (id: string) => (
-        <Text strong style={{ color: '#2563eb', cursor: 'pointer' }}>
+        <Text
+          strong
+          style={{ color: 'var(--color-primary-600)', cursor: 'pointer' }}
+        >
           {id}
         </Text>
       ),
@@ -170,7 +173,9 @@ const TracesPage: React.FC = () => {
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('YYYY-MM-DD HH:mm:ss')}>
           <Space size={4}>
-            <ClockCircleOutlined style={{ color: '#8c8c8c' }} />
+            <ClockCircleOutlined
+              style={{ color: 'var(--color-secondary-400)' }}
+            />
             <Text type='secondary'>{dayjs(date).fromNow()}</Text>
           </Space>
         </Tooltip>
@@ -214,7 +219,7 @@ const TracesPage: React.FC = () => {
           marginBottom: 24,
         }}
       >
-        <Title level={3} style={{ margin: 0 }}>
+        <Title level={4} style={{ margin: 0 }}>
           Traces
         </Title>
         <Space>

@@ -89,8 +89,8 @@ const VisualCanvasContent: React.FC<VisualCanvasProps> = ({
         position: { x: 50, y: batchY },
         data: { label: `Batch ${batchIndex + 1}` },
         style: {
-          background: '#f0f5ff',
-          border: '2px solid #1890ff',
+          background: 'var(--color-primary-light)',
+          border: '2px solid var(--color-primary-500)',
           borderRadius: '8px',
           padding: '8px 16px',
           fontWeight: '600',
@@ -118,7 +118,7 @@ const VisualCanvasContent: React.FC<VisualCanvasProps> = ({
           source: `batch-${batchIndex}`,
           target: nodeId,
           animated: true,
-          style: { stroke: '#1890ff' },
+          style: { stroke: 'var(--color-primary-500)' },
         });
       });
     });
@@ -237,14 +237,14 @@ const VisualCanvasContent: React.FC<VisualCanvasProps> = ({
         <Controls position='top-left' />
         <MiniMap
           position='bottom-right'
-          style={{ backgroundColor: '#f5f5f5' }}
+          style={{ backgroundColor: 'var(--color-secondary-100)' }}
           nodeColor={(node) => {
-            if (node.type === 'fault') return '#1890ff';
-            return '#666';
+            if (node.type === 'fault') return 'var(--color-primary-500)';
+            return 'var(--color-secondary-500)';
           }}
           nodeStrokeWidth={3}
         />
-        <Background color='#aaa' gap={16} />
+        <Background color='var(--color-secondary-400)' gap={16} />
 
         <Panel position='top-right' className='canvas-toolbar'>
           <Space>

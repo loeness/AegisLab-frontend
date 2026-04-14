@@ -9,7 +9,11 @@
  * - Shared filter/group/sort/columns state with workspace sidebar
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from 'react-router-dom';
 
 import { DatabaseOutlined, TagOutlined } from '@ant-design/icons';
 import type { ExecutionResp } from '@rcabench/client';
@@ -20,6 +24,7 @@ import duration from 'dayjs/plugin/duration';
 
 import { executionApi } from '@/api/executions';
 import { projectApi } from '@/api/projects';
+import BatchProgressBanner from '@/components/workspace/BatchProgressBanner';
 import WorkspacePageHeader from '@/components/workspace/WorkspacePageHeader';
 import WorkspaceTable from '@/components/workspace/WorkspaceTable';
 import type { ProjectOutletContext } from '@/hooks/useProjectContext';
@@ -52,13 +57,13 @@ interface ExecutionTableData {
 
 // Status mapping for display
 const statusDisplayMap: Record<string, { text: string; color: string }> = {
-  initial: { text: 'Initial', color: '#d9d9d9' },
-  pending: { text: 'Pending', color: '#faad14' },
-  running: { text: 'Running', color: '#1890ff' },
-  success: { text: 'Success', color: '#52c41a' },
-  failed: { text: 'Failed', color: '#f5222d' },
-  finished: { text: 'Finished', color: '#52c41a' },
-  crashed: { text: 'Crashed', color: '#faad14' },
+  initial: { text: 'Initial', color: 'var(--color-secondary-300)' },
+  pending: { text: 'Pending', color: 'var(--color-warning)' },
+  running: { text: 'Running', color: 'var(--color-primary-500)' },
+  success: { text: 'Success', color: 'var(--color-success)' },
+  failed: { text: 'Failed', color: 'var(--color-error)' },
+  finished: { text: 'Finished', color: 'var(--color-success)' },
+  crashed: { text: 'Crashed', color: 'var(--color-warning)' },
 };
 
 // Format duration
@@ -76,9 +81,28 @@ const formatDuration = (seconds?: number): string => {
 
 const ProjectExecutionList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { teamName, projectName, projectId } =
     useOutletContext<ProjectOutletContext>();
   const { user } = useAuthStore();
+
+  // Batch execution group tracking from URL query params
+  const groupIdFromUrl = searchParams.get('group_id');
+  const [dismissedGroupId, setDismissedGroupId] = useState<string | null>(null);
+  const activeGroupId =
+    groupIdFromUrl && groupIdFromUrl !== dismissedGroupId
+      ? groupIdFromUrl
+      : null;
+
+  const handleDismissBanner = useCallback(() => {
+    if (groupIdFromUrl) {
+      setDismissedGroupId(groupIdFromUrl);
+      // Clean up the URL param
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('group_id');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [groupIdFromUrl, searchParams, setSearchParams]);
 
   // Handle back to workspace
   const handleBackToWorkspace = () => {
@@ -592,7 +616,7 @@ const ProjectExecutionList: React.FC = () => {
   const renderStatus = (record: { state: string }) => {
     const status = statusDisplayMap[record.state] || {
       text: record.state,
-      color: '#6b7280',
+      color: 'var(--color-secondary-500)',
     };
     return (
       <Tag color={status.color} style={{ fontSize: '11px' }}>
@@ -626,7 +650,7 @@ const ProjectExecutionList: React.FC = () => {
     if (_key === 'datapack_id') {
       return (
         <Space>
-          <DatabaseOutlined style={{ color: '#3b82f6' }} />
+          <DatabaseOutlined style={{ color: 'var(--color-primary-500)' }} />
           <Text code style={{ fontSize: '11px' }}>
             {record.datapack_id}
           </Text>
@@ -646,6 +670,14 @@ const ProjectExecutionList: React.FC = () => {
         runsPanelCollapsed={runsPanelCollapsed}
         onToggleRunsPanel={handleToggleRunsPanel}
       />
+
+      {/* Batch execution progress banner */}
+      {activeGroupId && (
+        <BatchProgressBanner
+          groupId={activeGroupId}
+          onDismiss={handleDismissBanner}
+        />
+      )}
 
       <WorkspaceTable
         dataSource={tableData}

@@ -156,7 +156,7 @@ const ProjectEdit = () => {
             Back to Project
           </Button>
         </Space>
-        <Title level={2} style={{ marginTop: 16, marginBottom: 0 }}>
+        <Title level={4} style={{ marginTop: 16, marginBottom: 0 }}>
           <ProjectOutlined style={{ marginRight: 8 }} />
           Edit Project
         </Title>

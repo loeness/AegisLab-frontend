@@ -11,8 +11,6 @@ import {
   PlayCircleOutlined,
   PlusOutlined,
   SearchOutlined,
-  StarFilled,
-  StarOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
 import type { ProjectResp as Project } from '@rcabench/client';
@@ -51,11 +49,6 @@ const { Search } = Input;
 
 const ProjectList = () => {
   const navigate = useNavigate();
-  // Star functionality stub (profile store removed)
-  const toggleStar = async (_id: number) => {
-    /* TODO: implement star toggle */
-  };
-  const isStarred = (_id: number) => false;
   const [searchText, setSearchText] = useState('');
   const [pagination, setPagination] = useState({
     current: 1,
@@ -75,7 +68,6 @@ const ProjectList = () => {
     ],
   });
 
-  // Statistics - mock data for now
   const stats = {
     total: projectsData?.pagination?.total || 0,
     active:
@@ -129,7 +121,7 @@ const ProjectList = () => {
           <Avatar
             size='large'
             style={{
-              backgroundColor: '#3b82f6',
+              backgroundColor: 'var(--color-primary-500)',
               fontSize: '1.25rem',
             }}
             icon={<FolderOutlined />}
@@ -231,30 +223,6 @@ const ProjectList = () => {
         </Space>
       ),
     },
-    {
-      title: '',
-      key: 'star',
-      width: '5%',
-      render: (_: unknown, record: Project) => {
-        const starred = record.id ? isStarred(record.id) : false;
-        return (
-          <span
-            style={{
-              fontSize: 18,
-              color: starred ? '#f59e0b' : '#999',
-              cursor: 'pointer',
-              transition: 'color 0.2s, transform 0.2s',
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (record.id) toggleStar(record.id);
-            }}
-          >
-            {starred ? <StarFilled /> : <StarOutlined />}
-          </span>
-        );
-      },
-    },
   ];
 
   return (
@@ -262,7 +230,7 @@ const ProjectList = () => {
       {/* Page Header */}
       <div className='page-header'>
         <div className='page-header-left'>
-          <Title level={2} className='page-title'>
+          <Title level={4} className='page-title'>
             Projects
           </Title>
           <Text type='secondary'>

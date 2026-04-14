@@ -5,23 +5,26 @@
  *
  * Two tabs:
  * - Users: List all users with role badges, assign/remove roles via drawer
- * - Roles: List all roles with permission counts
+ * - Roles: List all roles with permissions management, create/delete roles
  */
 import { useCallback, useMemo, useState } from 'react';
 
 import {
   DeleteOutlined,
+  LockOutlined,
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import type { PermissionResp } from '@rcabench/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
   Card,
+  Checkbox,
   Descriptions,
   Drawer,
   Form,
@@ -31,6 +34,7 @@ import {
   Popconfirm,
   Select,
   Space,
+  Spin,
   Table,
   Tabs,
   Tag,
@@ -40,6 +44,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 
+import { permissionApi } from '@/api/permissions';
 import { roleApi } from '@/api/roles';
 import { usersApi } from '@/api/users';
 
@@ -185,7 +190,7 @@ const UsersTab: React.FC = () => {
       render: (text: string) => (
         <Space>
           <UserOutlined />
-          <Text strong style={{ color: '#2563eb' }}>
+          <Text strong style={{ color: 'var(--color-primary-600)' }}>
             {text}
           </Text>
         </Space>
@@ -453,6 +458,266 @@ const UsersTab: React.FC = () => {
   );
 };
 
+// ---------- Role Permissions Expanded View ----------
+
+const RolePermissionsView: React.FC<{ roleId: number }> = ({ roleId }) => {
+  const queryClient = useQueryClient();
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>(
+    []
+  );
+
+  // Fetch role detail (includes permissions)
+  const { data: roleDetail, isLoading: roleDetailLoading } = useQuery({
+    queryKey: ['role-detail', roleId],
+    queryFn: () => roleApi.getRole(roleId),
+    staleTime: 10_000,
+  });
+
+  // Fetch all permissions for the assign modal
+  const { data: allPermissions, isLoading: permissionsLoading } = useQuery({
+    queryKey: ['all-permissions'],
+    queryFn: () => permissionApi.getPermissions({ page: 1, size: 500 }),
+    staleTime: 30_000,
+    enabled: assignModalOpen,
+  });
+
+  // Remove permissions mutation
+  const removePermissionsMutation = useMutation({
+    mutationFn: (permissionIds: number[]) =>
+      roleApi.removePermissions(roleId, { permission_ids: permissionIds }),
+    onSuccess: () => {
+      message.success('Permission removed successfully');
+      queryClient.invalidateQueries({ queryKey: ['role-detail', roleId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-roles'] });
+    },
+    onError: () => {
+      message.error('Failed to remove permission');
+    },
+  });
+
+  // Assign permissions mutation
+  const assignPermissionsMutation = useMutation({
+    mutationFn: (permissionIds: number[]) =>
+      roleApi.assignPermissions(roleId, { permission_ids: permissionIds }),
+    onSuccess: () => {
+      message.success('Permissions assigned successfully');
+      setAssignModalOpen(false);
+      setSelectedPermissionIds([]);
+      queryClient.invalidateQueries({ queryKey: ['role-detail', roleId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-roles'] });
+    },
+    onError: () => {
+      message.error('Failed to assign permissions');
+    },
+  });
+
+  const currentPermissions: PermissionResp[] = useMemo(
+    () => roleDetail?.permissions ?? [],
+    [roleDetail]
+  );
+
+  const currentPermissionIds = useMemo(
+    () => new Set(currentPermissions.map((p) => p.id).filter(Boolean)),
+    [currentPermissions]
+  );
+
+  // Filter out already-assigned permissions in the assign modal
+  const availablePermissions = useMemo(() => {
+    if (!allPermissions) return [];
+    const perms = Array.isArray(allPermissions)
+      ? allPermissions
+      : ((allPermissions as unknown as { items?: PermissionResp[] }).items ??
+        []);
+    return perms.filter((p) => p.id != null && !currentPermissionIds.has(p.id));
+  }, [allPermissions, currentPermissionIds]);
+
+  if (roleDetailLoading) {
+    return (
+      <div style={{ padding: 16, textAlign: 'center' }}>
+        <Spin size='small' />
+      </div>
+    );
+  }
+
+  const permissionColumns: ColumnsType<PermissionResp> = [
+    {
+      title: 'Permission',
+      dataIndex: 'display_name',
+      key: 'display_name',
+      width: 200,
+      render: (text: string | undefined, record: PermissionResp) => (
+        <Space>
+          <LockOutlined />
+          <Text strong>{text ?? record.name ?? '-'}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      width: 120,
+      render: (action?: string) => {
+        if (!action) return <Text type='secondary'>-</Text>;
+        const colorMap: Record<string, string> = {
+          create: 'green',
+          read: 'blue',
+          update: 'orange',
+          delete: 'red',
+          manage: 'purple',
+        };
+        return (
+          <Tag color={colorMap[action.toLowerCase()] ?? 'default'}>
+            {action}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Resource',
+      dataIndex: 'resource_name',
+      key: 'resource_name',
+      width: 150,
+      render: (name?: string) => <Text type='secondary'>{name ?? '-'}</Text>,
+    },
+    {
+      title: 'Scope',
+      dataIndex: 'scope',
+      key: 'scope',
+      width: 100,
+      render: (scope?: string) =>
+        scope ? <Tag>{scope}</Tag> : <Text type='secondary'>-</Text>,
+    },
+    {
+      title: '',
+      key: 'remove',
+      width: 60,
+      render: (_: unknown, record: PermissionResp) => (
+        <Popconfirm
+          title='Remove this permission?'
+          okText='Remove'
+          okButtonProps={{ danger: true }}
+          onConfirm={() => {
+            if (record.id != null) {
+              removePermissionsMutation.mutate([record.id]);
+            }
+          }}
+        >
+          <Button type='text' size='small' danger icon={<DeleteOutlined />} />
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ padding: '8px 0' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 12,
+        }}
+      >
+        <Text strong>
+          <LockOutlined style={{ marginRight: 4 }} />
+          Permissions ({currentPermissions.length})
+        </Text>
+        <Button
+          type='primary'
+          size='small'
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setSelectedPermissionIds([]);
+            setAssignModalOpen(true);
+          }}
+        >
+          Assign Permissions
+        </Button>
+      </div>
+
+      {currentPermissions.length > 0 ? (
+        <Table<PermissionResp>
+          rowKey='id'
+          columns={permissionColumns}
+          dataSource={currentPermissions}
+          pagination={false}
+          size='small'
+        />
+      ) : (
+        <Text type='secondary'>No permissions assigned to this role.</Text>
+      )}
+
+      {/* Assign Permissions Modal */}
+      <Modal
+        title='Assign Permissions'
+        open={assignModalOpen}
+        onCancel={() => {
+          setAssignModalOpen(false);
+          setSelectedPermissionIds([]);
+        }}
+        onOk={() => {
+          if (selectedPermissionIds.length === 0) {
+            message.error('Please select at least one permission');
+            return;
+          }
+          assignPermissionsMutation.mutate(selectedPermissionIds);
+        }}
+        okText='Assign Selected'
+        confirmLoading={assignPermissionsMutation.isPending}
+        width={600}
+      >
+        {permissionsLoading ? (
+          <div style={{ textAlign: 'center', padding: 24 }}>
+            <Spin />
+          </div>
+        ) : availablePermissions.length === 0 ? (
+          <Text type='secondary'>
+            No additional permissions available to assign.
+          </Text>
+        ) : (
+          <div style={{ maxHeight: 400, overflow: 'auto' }}>
+            <Checkbox.Group
+              value={selectedPermissionIds}
+              onChange={(values) =>
+                setSelectedPermissionIds(values as number[])
+              }
+              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+            >
+              {availablePermissions.map((perm) => (
+                <Checkbox key={perm.id} value={perm.id}>
+                  <Space>
+                    <Text strong>{perm.display_name ?? perm.name ?? '-'}</Text>
+                    {perm.action && (
+                      <Tag
+                        color={
+                          {
+                            create: 'green',
+                            read: 'blue',
+                            update: 'orange',
+                            delete: 'red',
+                            manage: 'purple',
+                          }[perm.action.toLowerCase()] ?? 'default'
+                        }
+                      >
+                        {perm.action}
+                      </Tag>
+                    )}
+                    {perm.resource_name && (
+                      <Text type='secondary'>{perm.resource_name}</Text>
+                    )}
+                  </Space>
+                </Checkbox>
+              ))}
+            </Checkbox.Group>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
 // ---------- Roles Tab ----------
 
 const RolesTab: React.FC = () => {
@@ -460,6 +725,8 @@ const RolesTab: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [scopeFilter, setScopeFilter] = useState<string | undefined>();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createForm] = Form.useForm();
 
   // Fetch roles
   const { data: rolesData, isLoading } = useQuery({
@@ -467,6 +734,24 @@ const RolesTab: React.FC = () => {
     queryFn: () =>
       roleApi.getRoles({ page, size: pageSize, scope: scopeFilter }),
     staleTime: 10_000,
+  });
+
+  // Create role mutation
+  const createRoleMutation = useMutation({
+    mutationFn: (data: {
+      name: string;
+      display_name: string;
+      description?: string;
+    }) => roleApi.createRole(data),
+    onSuccess: () => {
+      message.success('Role created successfully');
+      setCreateModalOpen(false);
+      createForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin-roles'] });
+    },
+    onError: () => {
+      message.error('Failed to create role');
+    },
   });
 
   // Delete role mutation
@@ -493,6 +778,13 @@ const RolesTab: React.FC = () => {
     return (rolesData as { total?: number }).total ?? roles.length;
   }, [rolesData, roles.length]);
 
+  const handleCreateRole = useCallback(
+    (values: { name: string; display_name: string; description?: string }) => {
+      createRoleMutation.mutate(values);
+    },
+    [createRoleMutation]
+  );
+
   const columns: ColumnsType<RoleRecord> = [
     {
       title: 'Role Name',
@@ -502,7 +794,7 @@ const RolesTab: React.FC = () => {
       render: (text: string) => (
         <Space>
           <TeamOutlined />
-          <Text strong style={{ color: '#2563eb' }}>
+          <Text strong style={{ color: 'var(--color-primary-600)' }}>
             {text}
           </Text>
         </Space>
@@ -544,7 +836,9 @@ const RolesTab: React.FC = () => {
           count={count ?? 0}
           showZero
           style={{
-            backgroundColor: count ? '#2563eb' : '#d9d9d9',
+            backgroundColor: count
+              ? 'var(--color-primary-600)'
+              : 'var(--color-secondary-300)',
           }}
         />
       ),
@@ -606,14 +900,23 @@ const RolesTab: React.FC = () => {
             <Select.Option value='dataset'>Dataset</Select.Option>
           </Select>
         </Space>
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={() =>
-            queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
-          }
-        >
-          Refresh
-        </Button>
+        <Space>
+          <Button
+            type='primary'
+            icon={<PlusOutlined />}
+            onClick={() => setCreateModalOpen(true)}
+          >
+            Create Role
+          </Button>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
+            }
+          >
+            Refresh
+          </Button>
+        </Space>
       </div>
 
       {/* Table */}
@@ -622,6 +925,12 @@ const RolesTab: React.FC = () => {
         columns={columns}
         dataSource={roles}
         loading={isLoading}
+        expandable={{
+          expandedRowRender: (record) => (
+            <RolePermissionsView roleId={record.id} />
+          ),
+          rowExpandable: () => true,
+        }}
         pagination={{
           current: page,
           pageSize,
@@ -635,6 +944,49 @@ const RolesTab: React.FC = () => {
         }}
         size='middle'
       />
+
+      {/* Create Role Modal */}
+      <Modal
+        title='Create Role'
+        open={createModalOpen}
+        onCancel={() => {
+          setCreateModalOpen(false);
+          createForm.resetFields();
+        }}
+        onOk={() => createForm.submit()}
+        okText='Create'
+        confirmLoading={createRoleMutation.isPending}
+      >
+        <Form form={createForm} layout='vertical' onFinish={handleCreateRole}>
+          <Form.Item
+            name='name'
+            label='Name'
+            rules={[
+              { required: true, message: 'Please enter a role name' },
+              {
+                pattern: /^[a-z][a-z0-9_-]*$/,
+                message:
+                  'Name must start with a lowercase letter and contain only lowercase letters, numbers, hyphens, and underscores',
+              },
+            ]}
+          >
+            <Input placeholder='e.g., project-manager' />
+          </Form.Item>
+          <Form.Item
+            name='display_name'
+            label='Display Name'
+            rules={[{ required: true, message: 'Please enter a display name' }]}
+          >
+            <Input placeholder='e.g., Project Manager' />
+          </Form.Item>
+          <Form.Item name='description' label='Description'>
+            <Input.TextArea
+              rows={3}
+              placeholder='Optional description of this role'
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 };
@@ -644,7 +996,7 @@ const RolesTab: React.FC = () => {
 const AdminUsersPage: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3} style={{ marginBottom: 24 }}>
+      <Title level={4} style={{ marginBottom: 24 }}>
         <TeamOutlined style={{ marginRight: 8 }} />
         User & Role Management
       </Title>

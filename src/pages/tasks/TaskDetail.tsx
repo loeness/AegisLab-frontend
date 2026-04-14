@@ -162,19 +162,27 @@ const TaskDetail = () => {
   const getTaskTypeIcon = (type: TaskType) => {
     switch (type) {
       case TaskType.BuildContainer:
-        return <DashboardOutlined style={{ color: '#10b981' }} />;
+        return <DashboardOutlined style={{ color: 'var(--color-success)' }} />;
       case TaskType.RestartPedestal:
-        return <ReloadOutlined style={{ color: '#3b82f6' }} />;
+        return <ReloadOutlined style={{ color: 'var(--color-primary-500)' }} />;
       case TaskType.FaultInjection:
-        return <SyncOutlined style={{ color: '#f59e0b' }} />;
+        return <SyncOutlined style={{ color: 'var(--color-warning)' }} />;
       case TaskType.RunAlgorithm:
-        return <FunctionOutlined style={{ color: '#ec4899' }} />;
+        return <FunctionOutlined style={{ color: 'var(--color-info)' }} />;
       case TaskType.BuildDatapack:
-        return <DatabaseOutlined style={{ color: '#8b5cf6' }} />;
+        return (
+          <DatabaseOutlined style={{ color: 'var(--color-primary-700)' }} />
+        );
       case TaskType.CollectResult:
-        return <DatabaseOutlined style={{ color: '#8b5cf6' }} />;
+        return (
+          <DatabaseOutlined style={{ color: 'var(--color-primary-700)' }} />
+        );
       case TaskType.CronJob:
-        return <ClockCircleOutlined style={{ color: '#6b7280' }} />;
+        return (
+          <ClockCircleOutlined
+            style={{ color: 'var(--color-secondary-500)' }}
+          />
+        );
       default:
         return <ClockCircleOutlined />;
     }
@@ -183,40 +191,40 @@ const TaskDetail = () => {
   const getTaskTypeColor = (type: TaskType) => {
     switch (type) {
       case TaskType.BuildContainer:
-        return '#10b981';
+        return 'var(--color-success)';
       case TaskType.RestartPedestal:
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case TaskType.FaultInjection:
-        return '#f59e0b';
+        return 'var(--color-warning)';
       case TaskType.RunAlgorithm:
-        return '#ec4899';
+        return 'var(--color-info)';
       case TaskType.BuildDatapack:
-        return '#8b5cf6';
+        return 'var(--color-primary-700)';
       case TaskType.CollectResult:
-        return '#8b5cf6';
+        return 'var(--color-primary-700)';
       case TaskType.CronJob:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
   const getStateColor = (state: TaskState) => {
     switch (state) {
       case TaskState.Pending:
-        return '#d1d5db';
+        return 'var(--color-secondary-300)';
       case TaskState.Rescheduled:
-        return '#9ca3af';
+        return 'var(--color-secondary-400)';
       case TaskState.Running:
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case TaskState.Completed:
-        return '#10b981';
+        return 'var(--color-success)';
       case TaskState.Error:
-        return '#ef4444';
+        return 'var(--color-error)';
       case TaskState.Cancelled:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
@@ -225,7 +233,11 @@ const TaskDetail = () => {
       case TaskState.Pending:
         return <ClockCircleOutlined />;
       case TaskState.Rescheduled:
-        return <ClockCircleOutlined style={{ color: '#9ca3af' }} />;
+        return (
+          <ClockCircleOutlined
+            style={{ color: 'var(--color-secondary-400)' }}
+          />
+        );
       case TaskState.Running:
         return <SyncOutlined spin />;
       case TaskState.Completed:
@@ -311,7 +323,7 @@ const TaskDetail = () => {
           >
             Back to List
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             Task {taskId.substring(0, 8)}
           </Title>
           <Badge
@@ -566,8 +578,11 @@ const TaskDetail = () => {
                           <Text type='secondary'>Duration</Text>
                           <br />
                           <Title
-                            level={3}
-                            style={{ margin: 0, color: '#3b82f6' }}
+                            level={5}
+                            style={{
+                              margin: 0,
+                              color: 'var(--color-primary-500)',
+                            }}
                           >
                             {taskData?.created_at && taskData?.updated_at
                               ? (() => {
@@ -637,7 +652,7 @@ const TaskDetail = () => {
                 {logs.length > 0 ? (
                   <div
                     style={{
-                      background: '#f5f5f5',
+                      background: 'var(--color-secondary-100)',
                       padding: 16,
                       borderRadius: 4,
                       maxHeight: 400,

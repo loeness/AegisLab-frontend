@@ -65,7 +65,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ team }) => {
   return (
     <div className='settings-tab'>
       {/* Header */}
-      <Title level={2}>
+      <Title level={4}>
         Team Settings for {team.display_name || team.name}
       </Title>
       <Paragraph type='secondary' style={{ marginBottom: 24 }}>
@@ -111,10 +111,13 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ team }) => {
       {/* Danger Zone */}
       <Card
         style={{
-          borderColor: '#ff4d4f',
+          borderColor: 'var(--color-error)',
         }}
       >
-        <Title level={5} style={{ color: '#ff4d4f', marginBottom: 16 }}>
+        <Title
+          level={5}
+          style={{ color: 'var(--color-error)', marginBottom: 16 }}
+        >
           <ExclamationCircleOutlined style={{ marginRight: 8 }} />
           Danger Zone
         </Title>
@@ -125,7 +128,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ team }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '16px 0',
-            borderTop: '1px solid #f0f0f0',
+            borderTop: '1px solid var(--color-secondary-100)',
           }}
         >
           <div>

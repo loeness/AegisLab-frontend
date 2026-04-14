@@ -32,6 +32,7 @@ import {
   type OverviewField,
   OverviewTab,
 } from '@/components/workspace/DetailView';
+import PipelineProgress from '@/components/workspace/PipelineProgress';
 import type { ProjectOutletContext } from '@/hooks/useProjectContext';
 import { useAuthStore } from '@/store/auth';
 import { getColor } from '@/utils/colors';
@@ -157,7 +158,7 @@ const ProjectInjectionDetail: React.FC = () => {
       content: (
         <pre
           style={{
-            background: '#f5f5f5',
+            background: 'var(--color-secondary-100)',
             padding: 16,
             borderRadius: 6,
             maxHeight: 480,
@@ -189,7 +190,7 @@ const ProjectInjectionDetail: React.FC = () => {
             style={{
               width: '100%',
               padding: '6px 11px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-secondary-300)',
               borderRadius: 6,
               fontSize: 14,
               outline: 'none',
@@ -350,7 +351,7 @@ const ProjectInjectionDetail: React.FC = () => {
     ];
   }, [injection]);
 
-  // Build config object for display (use mock if no real data)
+  // Build config object for display (fallback to empty if no data)
   const configData = useMemo(() => {
     if (!injection) return undefined;
     // Use display_config if available, otherwise build from engine_config
@@ -389,31 +390,34 @@ const ProjectInjectionDetail: React.FC = () => {
       label: 'Overview',
       icon: <ProfileOutlined />,
       content: (
-        <OverviewTab
-          notes={injection?.description}
-          labels={injection?.labels || []}
-          author={user?.username || 'Unknown'}
-          state={injection?.state}
-          startTime={injection?.start_time}
-          runtime={runtime}
-          taskID={injection?.task_id}
-          traceID={injection?.trace_id}
-          taskLink={
-            injection?.task_id ? `/tasks/${injection.task_id}` : undefined
-          }
-          traceLink={
-            injection?.trace_id
-              ? `/${teamName}/${projectName}/traces/${injection.trace_id}`
-              : undefined
-          }
-          createdAt={injection?.created_at || new Date().toISOString()}
-          updatedAt={injection?.updated_at}
-          additionalFields={additionalFields}
-          config={configData}
-          groundTruth={groundTruthData}
-          onAddLabel={handleAddLabel}
-          onRemoveLabel={handleRemoveLabel}
-        />
+        <>
+          <PipelineProgress traceId={injection?.trace_id} />
+          <OverviewTab
+            notes={injection?.description}
+            labels={injection?.labels || []}
+            author={user?.username || 'Unknown'}
+            state={injection?.state}
+            startTime={injection?.start_time}
+            runtime={runtime}
+            taskID={injection?.task_id}
+            traceID={injection?.trace_id}
+            taskLink={
+              injection?.task_id ? `/tasks/${injection.task_id}` : undefined
+            }
+            traceLink={
+              injection?.trace_id
+                ? `/${teamName}/${projectName}/traces/${injection.trace_id}`
+                : undefined
+            }
+            createdAt={injection?.created_at || new Date().toISOString()}
+            updatedAt={injection?.updated_at}
+            additionalFields={additionalFields}
+            config={configData}
+            groundTruth={groundTruthData}
+            onAddLabel={handleAddLabel}
+            onRemoveLabel={handleRemoveLabel}
+          />
+        </>
       ),
     },
     {

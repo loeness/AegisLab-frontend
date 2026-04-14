@@ -206,7 +206,7 @@ const SystemSettings = () => {
     <div style={{ padding: 24 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0 }}>
+        <Title level={4} style={{ margin: 0 }}>
           <GlobalOutlined style={{ marginRight: 8 }} />
           System Settings
         </Title>
@@ -231,7 +231,7 @@ const SystemSettings = () => {
                 title='Total Users'
                 value={totalUsers}
                 prefix={<UserOutlined />}
-                valueStyle={{ color: '#3b82f6' }}
+                valueStyle={{ color: 'var(--color-primary-500)' }}
               />
             </Card>
           </Col>
@@ -241,7 +241,7 @@ const SystemSettings = () => {
                 title='Active Users'
                 value={activeUsers}
                 prefix={<UserOutlined />}
-                valueStyle={{ color: '#10b981' }}
+                valueStyle={{ color: 'var(--color-success)' }}
               />
             </Card>
           </Col>
@@ -251,7 +251,7 @@ const SystemSettings = () => {
                 title='Inactive Users'
                 value={totalUsers - activeUsers}
                 prefix={<UserOutlined />}
-                valueStyle={{ color: '#f59e0b' }}
+                valueStyle={{ color: 'var(--color-warning)' }}
               />
             </Card>
           </Col>

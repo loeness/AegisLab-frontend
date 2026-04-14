@@ -178,7 +178,7 @@ const ContainerForm = () => {
           <Button icon={<CloseOutlined />} onClick={handleCancel}>
             返回列表
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             {containerId ? '编辑容器' : '创建容器'}
           </Title>
         </Space>
@@ -236,7 +236,9 @@ const ContainerForm = () => {
                 >
                   <Option value={ContainerType.Pedestal}>
                     <Space>
-                      <ContainerOutlined style={{ color: '#3b82f6' }} />
+                      <ContainerOutlined
+                        style={{ color: 'var(--color-primary-500)' }}
+                      />
                       <div>
                         <div>Pedestal</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -247,7 +249,9 @@ const ContainerForm = () => {
                   </Option>
                   <Option value={ContainerType.Benchmark}>
                     <Space>
-                      <ContainerOutlined style={{ color: '#10b981' }} />
+                      <ContainerOutlined
+                        style={{ color: 'var(--color-success)' }}
+                      />
                       <div>
                         <div>Benchmark</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -258,7 +262,9 @@ const ContainerForm = () => {
                   </Option>
                   <Option value={ContainerType.Algorithm}>
                     <Space>
-                      <ContainerOutlined style={{ color: '#8b5cf6' }} />
+                      <ContainerOutlined
+                        style={{ color: 'var(--color-primary-700)' }}
+                      />
                       <div>
                         <div>Algorithm</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>

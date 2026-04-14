@@ -152,12 +152,14 @@ const ProjectOverview: React.FC = () => {
           <Space size={8}>
             {project.is_public ? (
               <>
-                <GlobalOutlined style={{ color: '#8c8c8c' }} />
+                <GlobalOutlined
+                  style={{ color: 'var(--color-secondary-400)' }}
+                />
                 <Text>Public</Text>
               </>
             ) : (
               <>
-                <TeamOutlined style={{ color: '#8c8c8c' }} />
+                <TeamOutlined style={{ color: 'var(--color-secondary-400)' }} />
                 <Text>Team</Text>
               </>
             )}
@@ -369,7 +371,7 @@ const ProjectOverview: React.FC = () => {
             block
             loading={updateMutation.isPending}
             className='save-button'
-            style={{ backgroundColor: '#5fbfbf' }}
+            style={{ backgroundColor: 'var(--color-primary-400)' }}
           >
             Save
           </Button>

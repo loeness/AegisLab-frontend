@@ -90,7 +90,7 @@ const Settings = () => {
     <div style={{ padding: 24 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0 }}>
+        <Title level={4} style={{ margin: 0 }}>
           <SettingOutlined style={{ marginRight: 8 }} />
           Settings
         </Title>
@@ -108,7 +108,7 @@ const Settings = () => {
                 size={96}
                 icon={<UserOutlined />}
                 src={userData.avatar}
-                style={{ backgroundColor: '#3b82f6' }}
+                style={{ backgroundColor: 'var(--color-primary-500)' }}
               />
               <div style={{ marginTop: 16 }}>
                 <Title level={4} style={{ margin: 0 }}>

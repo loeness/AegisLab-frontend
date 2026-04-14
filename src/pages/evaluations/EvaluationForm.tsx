@@ -216,7 +216,7 @@ const EvaluationForm = () => {
           <Button icon={<CloseOutlined />} onClick={handleCancel}>
             Back to List
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             New Evaluation
           </Title>
         </Space>
@@ -264,7 +264,9 @@ const EvaluationForm = () => {
                 >
                   <Option value='datapack'>
                     <Space>
-                      <DatabaseOutlined style={{ color: '#3b82f6' }} />
+                      <DatabaseOutlined
+                        style={{ color: 'var(--color-primary-500)' }}
+                      />
                       <div>
                         <div>Datapack Evaluation</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -275,7 +277,9 @@ const EvaluationForm = () => {
                   </Option>
                   <Option value='dataset'>
                     <Space>
-                      <DatabaseOutlined style={{ color: '#10b981' }} />
+                      <DatabaseOutlined
+                        style={{ color: 'var(--color-success)' }}
+                      />
                       <div>
                         <div>Dataset Evaluation</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -302,7 +306,9 @@ const EvaluationForm = () => {
                   {algorithmsData?.items?.map((algorithm) => (
                     <Option key={algorithm.id} value={algorithm.name}>
                       <Space>
-                        <FunctionOutlined style={{ color: '#f59e0b' }} />
+                        <FunctionOutlined
+                          style={{ color: 'var(--color-warning)' }}
+                        />
                         <div>
                           <div>{algorithm.name}</div>
                           <Text
@@ -398,7 +404,9 @@ const EvaluationForm = () => {
                         value={String(execution.datapack_id) || ''}
                       >
                         <Space>
-                          <DatabaseOutlined style={{ color: '#3b82f6' }} />
+                          <DatabaseOutlined
+                            style={{ color: 'var(--color-primary-500)' }}
+                          />
                           <div>
                             <div>
                               Datapack{' '}
@@ -435,7 +443,9 @@ const EvaluationForm = () => {
                     {datasetsData?.items?.map((dataset: DatasetResp) => (
                       <Option key={dataset.id} value={String(dataset.id)}>
                         <Space>
-                          <DatabaseOutlined style={{ color: '#10b981' }} />
+                          <DatabaseOutlined
+                            style={{ color: 'var(--color-success)' }}
+                          />
                           <div>
                             <div>{dataset.name}</div>
                             <Text
@@ -464,7 +474,9 @@ const EvaluationForm = () => {
                   {datasetsData?.items?.map((dataset) => (
                     <Option key={dataset.id} value={String(dataset.id)}>
                       <Space>
-                        <CheckCircleOutlined style={{ color: '#10b981' }} />
+                        <CheckCircleOutlined
+                          style={{ color: 'var(--color-success)' }}
+                        />
                         <div>
                           <div>{dataset.name}</div>
                           <Text
@@ -494,7 +506,10 @@ const EvaluationForm = () => {
                     <Progress
                       percent={evaluationProgress}
                       status='active'
-                      strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }}
+                      strokeColor={{
+                        '0%': 'var(--color-primary-500)',
+                        '100%': 'var(--color-success)',
+                      }}
                     />
                   </Space>
                 </Card>
@@ -624,7 +639,7 @@ const EvaluationForm = () => {
                   title='Available Algorithms'
                   value={algorithmsData?.items?.length || 0}
                   prefix={<FunctionOutlined />}
-                  valueStyle={{ color: '#f59e0b' }}
+                  valueStyle={{ color: 'var(--color-warning)' }}
                 />
               </Col>
               <Col span={12}>
@@ -632,7 +647,7 @@ const EvaluationForm = () => {
                   title='Available Datapacks'
                   value={executionsData?.items?.length || 0}
                   prefix={<DatabaseOutlined />}
-                  valueStyle={{ color: '#3b82f6' }}
+                  valueStyle={{ color: 'var(--color-primary-500)' }}
                 />
               </Col>
               <Col span={12}>
@@ -640,7 +655,7 @@ const EvaluationForm = () => {
                   title='Available Datasets'
                   value={datasetsData?.items?.length || 0}
                   prefix={<DatabaseOutlined />}
-                  valueStyle={{ color: '#10b981' }}
+                  valueStyle={{ color: 'var(--color-success)' }}
                 />
               </Col>
               <Col span={12}>
@@ -648,7 +663,7 @@ const EvaluationForm = () => {
                   title='Total Evaluations'
                   value='∞'
                   prefix={<BarChartOutlined />}
-                  valueStyle={{ color: '#8b5cf6' }}
+                  valueStyle={{ color: 'var(--color-primary-700)' }}
                 />
               </Col>
             </Row>

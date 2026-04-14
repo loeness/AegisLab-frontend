@@ -134,13 +134,13 @@ const DatasetDetail = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Trace':
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case 'Log':
-        return '#10b981';
+        return 'var(--color-success)';
       case 'Metric':
-        return '#f59e0b';
+        return 'var(--color-warning)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
@@ -153,7 +153,10 @@ const DatasetDetail = () => {
       render: (name: string) => (
         <Badge
           count={name}
-          style={{ backgroundColor: '#3b82f6', fontWeight: 'bold' }}
+          style={{
+            backgroundColor: 'var(--color-primary-500)',
+            fontWeight: 'bold',
+          }}
         />
       ),
     },
@@ -240,7 +243,7 @@ const DatasetDetail = () => {
           >
             Back to List
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             {datasetData.name}
           </Title>
         </Space>
@@ -342,8 +345,11 @@ const DatasetDetail = () => {
                           <Text type='secondary'>Total Versions</Text>
                           <br />
                           <Title
-                            level={3}
-                            style={{ margin: 0, color: '#3b82f6' }}
+                            level={5}
+                            style={{
+                              margin: 0,
+                              color: 'var(--color-primary-500)',
+                            }}
                           >
                             {versions.length}
                           </Title>

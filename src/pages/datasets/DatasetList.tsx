@@ -199,11 +199,13 @@ const DatasetList = () => {
   const getTypeIcon = (type: DatasetType) => {
     switch (type) {
       case 'Trace':
-        return <DatabaseOutlined style={{ color: '#3b82f6' }} />;
+        return (
+          <DatabaseOutlined style={{ color: 'var(--color-primary-500)' }} />
+        );
       case 'Log':
-        return <FileTextOutlined style={{ color: '#10b981' }} />;
+        return <FileTextOutlined style={{ color: 'var(--color-success)' }} />;
       case 'Metric':
-        return <LineChartOutlined style={{ color: '#f59e0b' }} />;
+        return <LineChartOutlined style={{ color: 'var(--color-warning)' }} />;
       default:
         return <DatabaseOutlined />;
     }
@@ -212,13 +214,13 @@ const DatasetList = () => {
   const getTypeColor = (type: DatasetType) => {
     switch (type) {
       case 'Trace':
-        return '#3b82f6';
+        return 'var(--color-primary-500)';
       case 'Log':
-        return '#10b981';
+        return 'var(--color-success)';
       case 'Metric':
-        return '#f59e0b';
+        return 'var(--color-warning)';
       default:
-        return '#6b7280';
+        return 'var(--color-secondary-500)';
     }
   };
 
@@ -304,7 +306,7 @@ const DatasetList = () => {
         <Badge
           count={versions.length}
           showZero
-          style={{ backgroundColor: '#3b82f6' }}
+          style={{ backgroundColor: 'var(--color-primary-500)' }}
         />
       ),
     },
@@ -381,7 +383,7 @@ const DatasetList = () => {
       {/* Page Header */}
       <div className='page-header'>
         <div className='page-header-left'>
-          <Title level={2} className='page-title'>
+          <Title level={4} className='page-title'>
             Dataset Management
           </Title>
           <Text type='secondary'>
@@ -555,7 +557,9 @@ const DatasetList = () => {
           showUploadList={false}
         >
           <p className='ant-upload-drag-icon'>
-            <CloudUploadOutlined style={{ fontSize: 48, color: '#3b82f6' }} />
+            <CloudUploadOutlined
+              style={{ fontSize: 48, color: 'var(--color-primary-500)' }}
+            />
           </p>
           <p className='ant-upload-text'>
             Click or drag dataset file to this area

@@ -159,7 +159,7 @@ const ProjectSettings: React.FC = () => {
       <Card
         title={<Text type='danger'>Danger Zone</Text>}
         style={{ marginTop: 24 }}
-        styles={{ header: { borderBottom: '1px solid #ff4d4f' } }}
+        styles={{ header: { borderBottom: '1px solid var(--color-error)' } }}
       >
         <Space direction='vertical' style={{ width: '100%' }}>
           <div>

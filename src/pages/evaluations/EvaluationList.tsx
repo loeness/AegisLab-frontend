@@ -222,9 +222,9 @@ const EvaluationList = () => {
   };
 
   const getMetricColor = (value: number) => {
-    if (value >= 0.9) return '#10b981';
-    if (value >= 0.7) return '#f59e0b';
-    return '#ef4444';
+    if (value >= 0.9) return 'var(--color-success)';
+    if (value >= 0.7) return 'var(--color-warning)';
+    return 'var(--color-error)';
   };
 
   const getMetricStatus = (value: number) => {
@@ -247,7 +247,7 @@ const EvaluationList = () => {
         <Space>
           <Avatar
             size='small'
-            style={{ backgroundColor: '#f59e0b' }}
+            style={{ backgroundColor: 'var(--color-warning)' }}
             icon={<FunctionOutlined />}
           />
           <div>
@@ -267,7 +267,7 @@ const EvaluationList = () => {
       width: '15%',
       render: (datapackId: string) => (
         <Space>
-          <DatabaseOutlined style={{ color: '#3b82f6' }} />
+          <DatabaseOutlined style={{ color: 'var(--color-primary-500)' }} />
           <Text code>{datapackId?.substring(0, 8)}</Text>
         </Space>
       ),
@@ -279,7 +279,7 @@ const EvaluationList = () => {
       width: '15%',
       render: (datasetId: string) => (
         <Space>
-          <DatabaseOutlined style={{ color: '#10b981' }} />
+          <DatabaseOutlined style={{ color: 'var(--color-success)' }} />
           <Text code>{datasetId?.substring(0, 8)}</Text>
         </Space>
       ),
@@ -395,7 +395,7 @@ const EvaluationList = () => {
       {/* Page Header */}
       <div className='page-header'>
         <div className='page-header-left'>
-          <Title level={2} className='page-title'>
+          <Title level={4} className='page-title'>
             Evaluation Results
           </Title>
           <Text type='secondary'>

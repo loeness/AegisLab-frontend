@@ -475,7 +475,7 @@ const InjectionCreate: React.FC = () => {
                     style={{
                       padding: '12px',
                       textAlign: 'center',
-                      color: '#999',
+                      color: 'var(--color-secondary-400)',
                       fontSize: '12px',
                     }}
                   >

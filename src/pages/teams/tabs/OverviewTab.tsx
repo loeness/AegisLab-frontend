@@ -118,7 +118,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ team }) => {
           ) : (
             <Empty
               image={
-                <FileTextOutlined style={{ fontSize: 48, color: '#ccc' }} />
+                <FileTextOutlined
+                  style={{ fontSize: 48, color: 'var(--color-secondary-300)' }}
+                />
               }
               description={
                 <span>
@@ -191,7 +193,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ team }) => {
           />
         ) : (
           <Empty
-            image={<FolderOutlined style={{ fontSize: 48, color: '#ccc' }} />}
+            image={
+              <FolderOutlined
+                style={{ fontSize: 48, color: 'var(--color-secondary-300)' }}
+              />
+            }
             description={
               <span>
                 <Text strong>No projects yet</Text>

@@ -79,11 +79,13 @@ const phaseStatusIcon = (status: PhaseInfo['status']) => {
     case 'process':
       return <LoadingOutlined />;
     case 'finish':
-      return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+      return <CheckCircleOutlined style={{ color: 'var(--color-success)' }} />;
     case 'error':
-      return <CloseCircleOutlined style={{ color: '#ff4d4f' }} />;
+      return <CloseCircleOutlined style={{ color: 'var(--color-error)' }} />;
     default:
-      return <ClockCircleOutlined style={{ color: '#d9d9d9' }} />;
+      return (
+        <ClockCircleOutlined style={{ color: 'var(--color-secondary-300)' }} />
+      );
   }
 };
 
@@ -254,7 +256,7 @@ const TraceDetailPage: React.FC = () => {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(`/${teamName}/${projectName}/traces`)}
           />
-          <Title level={3} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             Trace Detail
           </Title>
           {overallStatusTag(phases)}
@@ -365,10 +367,10 @@ const TraceDetailPage: React.FC = () => {
               {PHASE_ORDER.map((phase) => {
                 const info = phases[phase];
                 const statusColors: Record<string, string> = {
-                  wait: '#d9d9d9',
-                  process: '#1890ff',
-                  finish: '#52c41a',
-                  error: '#ff4d4f',
+                  wait: 'var(--color-secondary-300)',
+                  process: 'var(--color-primary-500)',
+                  finish: 'var(--color-success)',
+                  error: 'var(--color-error)',
                 };
                 return (
                   <div

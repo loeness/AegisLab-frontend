@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  PlusOutlined,
-  StarFilled,
-  StarOutlined,
-  TeamOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined, TeamOutlined } from '@ant-design/icons';
 import { PageSize } from '@rcabench/client';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Input, Table, Tag, Typography } from 'antd';
@@ -27,12 +22,6 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ team }) => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  // Star functionality stub (profile store removed)
-  const toggleStar = async (_id: number) => {
-    /* TODO: implement star toggle */
-  };
-  const isStarred = (_id: number) => false;
-
   // Fetch team projects
   const { data: projectsData, isLoading } = useQuery({
     queryKey: ['team', 'projects', team.id, page, search],
@@ -45,10 +34,6 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ team }) => {
 
   const handleCreateProject = () => {
     navigate('/projects/new');
-  };
-
-  const handleToggleStar = async (projectId: number) => {
-    await toggleStar(projectId);
   };
 
   const columns: ColumnsType<ProjectResp> = [
@@ -121,32 +106,6 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ team }) => {
           <Text>
             {totalRuns} ({injectionCount}/{executionCount})
           </Text>
-        );
-      },
-    },
-    {
-      title: '',
-      key: 'star',
-      width: 60,
-      render: (_: unknown, record: ProjectResp) => {
-        if (!record.id) return null;
-        const starred = isStarred(record.id);
-        return (
-          <Button
-            type='text'
-            icon={
-              starred ? (
-                <StarFilled style={{ color: '#fadb14' }} />
-              ) : (
-                <StarOutlined style={{ color: '#d9d9d9' }} />
-              )
-            }
-            onClick={(e) => {
-              if (!record.id) return null;
-              e.stopPropagation();
-              handleToggleStar(record.id);
-            }}
-          />
         );
       },
     },

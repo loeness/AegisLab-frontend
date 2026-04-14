@@ -161,7 +161,7 @@ const DatasetForm = () => {
           <Button icon={<CloseOutlined />} onClick={handleCancel}>
             Back to List
           </Button>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0 }}>
             {datasetId ? 'Edit Dataset' : 'Create Dataset'}
           </Title>
         </Space>
@@ -223,7 +223,9 @@ const DatasetForm = () => {
                 >
                   <Option value='Trace'>
                     <Space>
-                      <DatabaseOutlined style={{ color: '#3b82f6' }} />
+                      <DatabaseOutlined
+                        style={{ color: 'var(--color-primary-500)' }}
+                      />
                       <div>
                         <div>Trace</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -235,7 +237,9 @@ const DatasetForm = () => {
                   </Option>
                   <Option value='Log'>
                     <Space>
-                      <FileTextOutlined style={{ color: '#10b981' }} />
+                      <FileTextOutlined
+                        style={{ color: 'var(--color-success)' }}
+                      />
                       <div>
                         <div>Log</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>
@@ -246,7 +250,9 @@ const DatasetForm = () => {
                   </Option>
                   <Option value='Metric'>
                     <Space>
-                      <LineChartOutlined style={{ color: '#f59e0b' }} />
+                      <LineChartOutlined
+                        style={{ color: 'var(--color-warning)' }}
+                      />
                       <div>
                         <div>Metric</div>
                         <Text type='secondary' style={{ fontSize: '0.75rem' }}>

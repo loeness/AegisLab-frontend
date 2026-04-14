@@ -1,8 +1,8 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Card, Form, Input, message, Typography } from 'antd';
 
 import { useAuthStore } from '@/store/auth';
 
@@ -36,13 +36,14 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background:
+          'linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%)',
       }}
     >
       <Card
         style={{
           width: 420,
-          boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+          boxShadow: '0 20px 25px -5px var(--color-shadow, rgb(0 0 0 / 0.1))',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -54,7 +55,7 @@ const Login = () => {
           >
             🔬
           </div>
-          <Title level={2} style={{ marginBottom: '8px' }}>
+          <Title level={4} style={{ marginBottom: '8px' }}>
             RCABench
           </Title>
           <Text type='secondary'>微服务根因分析基准测试平台</Text>

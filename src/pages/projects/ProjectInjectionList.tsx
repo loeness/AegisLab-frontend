@@ -11,14 +11,25 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
-import { TagOutlined } from '@ant-design/icons';
+import { InboxOutlined, TagOutlined, UploadOutlined } from '@ant-design/icons';
 import {
   DatapackStateString,
   type InjectionResp,
   PageSize,
 } from '@rcabench/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Input, message, Modal, Space, Tag, Typography } from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Space,
+  Tag,
+  Typography,
+  Upload,
+  type UploadFile,
+} from 'antd';
 
 import { injectionApi } from '@/api/injections';
 import { projectApi } from '@/api/projects';
@@ -391,7 +402,7 @@ const ProjectInjectionList: React.FC = () => {
     staleTime: 0,
   });
 
-  // Transform API data to table format, with mock data fallback
+  // Transform API data to table format
   const tableData = useMemo((): InjectionTableData[] => {
     // If API returns data, use it
     if (injectionsData?.items && injectionsData.items.length > 0) {
@@ -412,7 +423,7 @@ const ProjectInjectionList: React.FC = () => {
     return [];
   }, [injectionsData]);
 
-  // Total count (API or mock)
+  // Total count
   const totalCount = useMemo(() => {
     if (injectionsData?.total) {
       return injectionsData.total;
@@ -561,6 +572,54 @@ const ProjectInjectionList: React.FC = () => {
     });
   }, [selectedRowKeys]);
 
+  // Upload datapack modal state
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadForm] = Form.useForm();
+  const [uploadFileList, setUploadFileList] = useState<UploadFile[]>([]);
+
+  const uploadMutation = useMutation({
+    mutationFn: (values: {
+      file: File;
+      name: string;
+      fault_type?: string;
+      category?: string;
+      benchmark_name?: string;
+      pedestal_name?: string;
+    }) =>
+      injectionApi.uploadDatapack({
+        ...values,
+        project_id: projectId as number,
+      }),
+    onSuccess: () => {
+      message.success('Datapack uploaded successfully');
+      setUploadModalOpen(false);
+      uploadForm.resetFields();
+      setUploadFileList([]);
+      queryClient.invalidateQueries({ queryKey: ['injections', projectId] });
+    },
+    onError: () => {
+      message.error('Failed to upload datapack');
+    },
+  });
+
+  const handleUploadSubmit = useCallback(() => {
+    uploadForm.validateFields().then((values) => {
+      if (uploadFileList.length === 0) {
+        message.warning('Please select a ZIP file');
+        return;
+      }
+      const file = uploadFileList[0].originFileObj as File;
+      uploadMutation.mutate({
+        file,
+        name: values.name,
+        fault_type: values.fault_type || undefined,
+        category: values.category || undefined,
+        benchmark_name: values.benchmark_name || undefined,
+        pedestal_name: values.pedestal_name || undefined,
+      });
+    });
+  }, [uploadForm, uploadFileList, uploadMutation]);
+
   // Custom name renderer - simplified to show only name
   const renderName = (record: InjectionTableData) => (
     <Text strong>{record.name}</Text>
@@ -570,7 +629,7 @@ const ProjectInjectionList: React.FC = () => {
   const renderStatus = (record: InjectionTableData) => {
     const state = stateDisplayMap[record.state] || {
       text: record.state,
-      color: '#6b7280',
+      color: 'var(--color-secondary-500)',
     };
     return (
       <Tag color={state.color} style={{ fontSize: '11px' }}>
@@ -651,7 +710,76 @@ const ProjectInjectionList: React.FC = () => {
         backTooltip='Back to Workspace'
         onBulkDelete={handleBulkDelete}
         onBulkAddTags={handleBulkAddTags}
+        toolbarExtra={
+          <Button
+            icon={<UploadOutlined />}
+            onClick={() => setUploadModalOpen(true)}
+          >
+            Upload Datapack
+          </Button>
+        }
       />
+
+      {/* Upload Datapack Modal */}
+      <Modal
+        title='Upload Datapack'
+        open={uploadModalOpen}
+        onCancel={() => {
+          setUploadModalOpen(false);
+          uploadForm.resetFields();
+          setUploadFileList([]);
+        }}
+        onOk={handleUploadSubmit}
+        okText='Upload'
+        confirmLoading={uploadMutation.isPending}
+        destroyOnClose
+      >
+        <Form form={uploadForm} layout='vertical' style={{ marginTop: 16 }}>
+          <Form.Item
+            name='name'
+            label='Name'
+            rules={[
+              { required: true, message: 'Please enter a datapack name' },
+            ]}
+          >
+            <Input placeholder='Enter datapack name' />
+          </Form.Item>
+
+          <Form.Item label='ZIP File' required>
+            <Upload.Dragger
+              accept='.zip'
+              maxCount={1}
+              fileList={uploadFileList}
+              beforeUpload={() => false}
+              onChange={({ fileList }) => setUploadFileList(fileList)}
+            >
+              <p className='ant-upload-drag-icon'>
+                <InboxOutlined />
+              </p>
+              <p className='ant-upload-text'>
+                Click or drag a ZIP file to this area
+              </p>
+              <p className='ant-upload-hint'>Only .zip files are accepted</p>
+            </Upload.Dragger>
+          </Form.Item>
+
+          <Form.Item name='fault_type' label='Fault Type'>
+            <Input placeholder='e.g. cpu, network, pod-kill' />
+          </Form.Item>
+
+          <Form.Item name='category' label='Category'>
+            <Input placeholder='e.g. resource, network' />
+          </Form.Item>
+
+          <Form.Item name='benchmark_name' label='Benchmark Name'>
+            <Input placeholder='e.g. train-ticket, sock-shop' />
+          </Form.Item>
+
+          <Form.Item name='pedestal_name' label='Pedestal Name'>
+            <Input placeholder='e.g. kubernetes' />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
