@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
-  BellOutlined,
   DashboardOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -13,7 +12,6 @@ import {
 } from '@ant-design/icons';
 import {
   Avatar,
-  Badge,
   Breadcrumb,
   Button,
   Drawer,
@@ -159,7 +157,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
       'admin',
       'settings',
       'tasks',
-      'notifications',
     ];
     if (
       pathParts.length >= 1 &&
@@ -259,12 +256,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
         <div className='app-header-right'>
           <ThemeToggle />
-          <Badge count={0} size='small'>
-            <BellOutlined
-              style={{ fontSize: 18, cursor: 'pointer' }}
-              onClick={() => navigate('/notifications')}
-            />
-          </Badge>
           <Dropdown
             menu={{ items: userDropdownItems, onClick: handleUserMenuClick }}
             placement='bottomRight'

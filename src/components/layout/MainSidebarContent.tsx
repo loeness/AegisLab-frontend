@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  BellOutlined,
   ContainerOutlined,
   DatabaseOutlined,
   FolderOutlined,
@@ -178,11 +177,6 @@ const MainSidebarContent: React.FC<MainSidebarContentProps> = ({
       key: '/tasks',
       icon: <OrderedListOutlined />,
       label: 'Tasks',
-    },
-    {
-      key: '/notifications',
-      icon: <BellOutlined />,
-      label: 'Notifications',
     },
     // Admin section (conditionally visible)
     ...(isAdmin

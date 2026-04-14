@@ -59,9 +59,9 @@
 .workspace-sidebar-menu .ant-menu-item-divider {
   margin: 8px 0;
   height: 1px;
-  background: #e5e7eb;
+  background: var(--color-secondary-200);
 }
 
 [data-theme='dark'] .workspace-sidebar-menu .ant-menu-item-divider {
-  background: #374151;
+  background: var(--color-secondary-700);
 }

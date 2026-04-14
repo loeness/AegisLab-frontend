@@ -6,6 +6,7 @@ import {
   BulbOutlined,
   NodeIndexOutlined,
   PlayCircleOutlined,
+  RocketOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
@@ -42,7 +43,7 @@ const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
     {
       key: 'injections',
       icon: <BulbOutlined />,
-      label: 'Injections',
+      label: 'Datapacks',
     },
     {
       key: 'executions',
@@ -53,6 +54,11 @@ const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
       key: 'evaluations',
       icon: <SafetyCertificateOutlined />,
       label: 'Evaluations',
+    },
+    {
+      key: 'algorithms',
+      icon: <RocketOutlined />,
+      label: 'Algorithms',
     },
     {
       key: 'traces',
