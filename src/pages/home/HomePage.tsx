@@ -2,16 +2,13 @@ import { useNavigate } from 'react-router-dom';
 
 import {
   ArrowRightOutlined,
-  ExperimentOutlined,
   FolderOutlined,
+  OrderedListOutlined,
   PlusOutlined,
   RocketOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { ProjectResp } from '@rcabench/client';
-import { useQuery } from '@tanstack/react-query';
 import {
-  Badge,
   Button,
   Card,
   Col,
@@ -20,16 +17,13 @@ import {
   Row,
   Skeleton,
   Space,
-  Spin,
   Statistic,
+  Steps,
   Typography,
 } from 'antd';
 import dayjs from 'dayjs';
 
-import { metricsApi } from '@/api/metrics';
-import { systemApi } from '@/api/system';
 import { useProjects } from '@/hooks/useProjects';
-import { useProjectTeamMap } from '@/hooks/useProjectTeamMap';
 import { useAuthStore } from '@/store/auth';
 
 import './HomePage.css';
@@ -38,7 +32,7 @@ const { Title, Text, Paragraph } = Typography;
 
 /**
  * Home Page
- * Personal dashboard showing recent projects, metrics, and quick actions
+ * Personal dashboard showing recent projects, quick stats, and getting started guide
  */
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -51,34 +45,7 @@ const HomePage: React.FC = () => {
     queryKey: ['projects', 'recent'],
   });
 
-  // Fetch metrics
-  const { data: injectionMetrics } = useQuery({
-    queryKey: ['metrics', 'injections'],
-    queryFn: () => metricsApi.getInjectionMetrics(),
-  });
-
-  const { data: executionMetrics } = useQuery({
-    queryKey: ['metrics', 'executions'],
-    queryFn: () => metricsApi.getExecutionMetrics(),
-  });
-
-  // Fetch system status
-  const { data: systemMetrics } = useQuery({
-    queryKey: ['system', 'metrics'],
-    queryFn: () => systemApi.getSystemMetrics(),
-    refetchInterval: 60000, // Refresh every minute
-  });
-
   const recentProjects = projectsData?.items || [];
-
-  // Project name → team name mapping for navigation
-  const projectTeamMap = useProjectTeamMap();
-
-  // Determine system health
-  const systemHealthy =
-    systemMetrics?.status === 'healthy' ||
-    systemMetrics?.status === 'ok' ||
-    (systemMetrics && !systemMetrics.status);
 
   return (
     <div className='home-page'>
@@ -103,64 +70,30 @@ const HomePage: React.FC = () => {
           </Button>
           <Button
             size='large'
-            icon={<FolderOutlined />}
-            onClick={() => navigate('/projects')}
+            icon={<OrderedListOutlined />}
+            onClick={() => navigate('/tasks')}
           >
-            View All Projects
+            View Tasks
           </Button>
         </Space>
       </Card>
 
-      {/* Metrics Cards — 3 cards: Injections, Executions, System Status */}
+      {/* Quick Stats */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12}>
           <Card>
             <Statistic
-              title='Total Injections'
-              value={injectionMetrics?.total ?? '-'}
-              prefix={<ExperimentOutlined />}
+              title='Total Projects'
+              value={projectsData?.pagination?.total ?? '-'}
+              prefix={<FolderOutlined />}
             />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Card>
-            <Statistic
-              title='Total Executions'
-              value={executionMetrics?.total ?? '-'}
-              prefix={<ThunderboltOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={8}>
-          <Card>
-            <Space direction='vertical' size={4}>
-              <Text type='secondary'>System Status</Text>
-              {systemMetrics ? (
-                <Badge
-                  status={systemHealthy ? 'success' : 'error'}
-                  text={
-                    <Text strong style={{ fontSize: 16 }}>
-                      {systemHealthy ? 'Healthy' : 'Degraded'}
-                    </Text>
-                  }
-                />
-              ) : (
-                <Badge status='default' text={<Spin size='small' />} />
-              )}
-              {systemMetrics?.cpu_usage != null && (
-                <Text type='secondary' style={{ fontSize: 12 }}>
-                  CPU: {systemMetrics.cpu_usage}% | Mem:{' '}
-                  {systemMetrics.memory_usage}%
-                </Text>
-              )}
-            </Space>
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[24, 24]}>
         {/* Recent Projects */}
-        <Col xs={24} lg={recentProjects.length === 0 ? 16 : 24}>
+        <Col xs={24} lg={14}>
           <Card
             title={
               <Space>
@@ -183,14 +116,7 @@ const HomePage: React.FC = () => {
                 renderItem={(project: ProjectResp) => (
                   <List.Item
                     className='project-list-item'
-                    onClick={() => {
-                      const teamName = projectTeamMap.get(project.name ?? '');
-                      if (teamName) {
-                        navigate(`/${teamName}/${project.name}`);
-                      } else {
-                        navigate('/projects');
-                      }
-                    }}
+                    onClick={() => navigate(`/projects/${project.id}`)}
                     style={{ cursor: 'pointer' }}
                     actions={[
                       <Button
@@ -240,48 +166,41 @@ const HomePage: React.FC = () => {
           </Card>
         </Col>
 
-        {/* Getting Started — only shown when user has no projects */}
-        {recentProjects.length === 0 && (
-          <Col xs={24} lg={8}>
-            <Card
-              title={
-                <Space>
-                  <RocketOutlined />
-                  <span>Getting Started</span>
-                </Space>
-              }
-            >
-              <Space direction='vertical' style={{ width: '100%' }}>
-                <div className='getting-started-item'>
-                  <Text strong>1. Create a Project</Text>
-                  <br />
-                  <Text type='secondary'>
-                    Projects help organize your experiments
-                  </Text>
-                </div>
-                <div className='getting-started-item'>
-                  <Text strong>2. Create Injections</Text>
-                  <br />
-                  <Text type='secondary'>
-                    Configure fault injection scenarios
-                  </Text>
-                </div>
-                <div className='getting-started-item'>
-                  <Text strong>3. Run Executions</Text>
-                  <br />
-                  <Text type='secondary'>
-                    Execute RCA algorithms on your data
-                  </Text>
-                </div>
-                <div className='getting-started-item'>
-                  <Text strong>4. Analyze Results</Text>
-                  <br />
-                  <Text type='secondary'>Review artifacts and evaluations</Text>
-                </div>
+        {/* Getting Started — always visible */}
+        <Col xs={24} lg={10}>
+          <Card
+            title={
+              <Space>
+                <RocketOutlined />
+                <span>Getting Started</span>
               </Space>
-            </Card>
-          </Col>
-        )}
+            }
+          >
+            <Steps
+              direction='vertical'
+              size='small'
+              current={-1}
+              items={[
+                {
+                  title: 'Create a Project',
+                  description: 'Organize your RCA experiments',
+                },
+                {
+                  title: 'Inject Faults',
+                  description: 'Configure and run fault injection pipelines',
+                },
+                {
+                  title: 'Run Algorithms',
+                  description: 'Execute RCA algorithms on collected data',
+                },
+                {
+                  title: 'Evaluate Results',
+                  description: 'Compare algorithm performance',
+                },
+              ]}
+            />
+          </Card>
+        </Col>
       </Row>
     </div>
   );

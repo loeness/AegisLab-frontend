@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
   DashboardOutlined,
-  DatabaseOutlined,
   DeleteOutlined,
   EyeOutlined,
-  FunctionOutlined,
   PauseCircleOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -18,7 +16,6 @@ import {
 import { ListTasksTaskType, type TaskResp, TaskState } from '@rcabench/client';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Avatar,
   Badge,
   Button,
   Card,
@@ -27,7 +24,6 @@ import {
   Input,
   message,
   Modal,
-  Progress,
   Row,
   Select,
   Space,
@@ -50,9 +46,26 @@ const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
+/** Human-readable task type names */
+const taskTypeNames: Record<string, string> = {
+  '0': 'Build Container',
+  '1': 'Restart Pedestal',
+  '2': 'Fault Injection',
+  '3': 'Run Algorithm',
+  '4': 'Build Datapack',
+  '5': 'Collect Result',
+  '6': 'Cron Job',
+};
+
+const getTaskTypeName = (
+  type: ListTasksTaskType | string | undefined
+): string => {
+  if (type === undefined || type === null) return 'Unknown';
+  return taskTypeNames[String(type)] ?? String(type);
+};
+
 const TaskList = () => {
   const navigate = useNavigate();
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [typeFilter, setTypeFilter] = useState<ListTasksTaskType | undefined>();
   const [stateFilter, setStateFilter] = useState<TaskState | undefined>();
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -108,7 +121,6 @@ const TaskList = () => {
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          // Update task status based on SSE data
           if (data.type === 'task_update') {
             message.info(`Task ${task.id} update: ${data.message}`);
             refetch();
@@ -137,23 +149,23 @@ const TaskList = () => {
     pending:
       tasksData?.items?.filter(
         (t: TaskResp) => String(t.state) === String(TaskState.Pending)
-      ).length || 0, // PENDING
+      ).length || 0,
     running:
       tasksData?.items?.filter(
         (t: TaskResp) => String(t.state) === String(TaskState.Running)
-      ).length || 0, // RUNNING
+      ).length || 0,
     completed:
       tasksData?.items?.filter(
         (t: TaskResp) => String(t.state) === String(TaskState.Completed)
-      ).length || 0, // COMPLETED
+      ).length || 0,
     error:
       tasksData?.items?.filter(
         (t: TaskResp) => String(t.state) === String(TaskState.Error)
-      ).length || 0, // ERROR
+      ).length || 0,
     cancelled:
       tasksData?.items?.filter(
         (t: TaskResp) => String(t.state) === String(TaskState.Cancelled)
-      ).length || 0, // CANCELLED
+      ).length || 0,
   };
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
@@ -184,28 +196,6 @@ const TaskList = () => {
     }
   };
 
-  const handleCancelTask = (task: TaskResp) => {
-    if (
-      String(task.state) !== String(TaskState.Running) &&
-      String(task.state) !== String(TaskState.Pending)
-    ) {
-      // Not RUNNING or PENDING
-      message.warning('Only running or pending tasks can be cancelled');
-      return;
-    }
-
-    Modal.confirm({
-      title: 'Cancel Task',
-      content: `Are you sure you want to cancel task "${task.id}"?`,
-      okText: 'Yes, cancel it',
-      okButtonProps: { danger: true },
-      cancelText: 'No',
-      onOk: () => {
-        message.info('Task cancellation is not yet supported by the backend');
-      },
-    });
-  };
-
   const handleDeleteTask = (id?: string) => {
     if (!id) return;
 
@@ -221,35 +211,8 @@ const TaskList = () => {
           await taskApi.batchDelete([id]);
           message.success('Task deleted successfully');
           refetch();
-        } catch (error) {
+        } catch {
           message.error('Failed to delete task');
-        }
-      },
-    });
-  };
-
-  const handleBatchDelete = () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning('Please select tasks to delete');
-      return;
-    }
-
-    Modal.confirm({
-      title: 'Batch Delete Tasks',
-      content: `Are you sure you want to delete ${selectedRowKeys.length} tasks?`,
-      okText: 'Yes, delete them',
-      okButtonProps: { danger: true },
-      cancelText: 'Cancel',
-      onOk: async () => {
-        try {
-          await taskApi.batchDelete(selectedRowKeys as string[]);
-          message.success(
-            `${selectedRowKeys.length} tasks deleted successfully`
-          );
-          setSelectedRowKeys([]);
-          refetch();
-        } catch (error) {
-          message.error('Failed to delete tasks');
         }
       },
     });
@@ -260,39 +223,35 @@ const TaskList = () => {
     message.success('Tasks refreshed');
   };
 
-  const getTaskTypeIcon = (type: ListTasksTaskType | string | undefined) => {
-    if (type === undefined || type === null) return <ClockCircleOutlined />;
+  const getStateColor = (state: TaskState) => {
+    switch (state) {
+      case TaskState.Pending:
+        return 'var(--color-secondary-300)';
+      case TaskState.Running:
+        return 'var(--color-primary-500)';
+      case TaskState.Completed:
+        return 'var(--color-success)';
+      case TaskState.Error:
+        return 'var(--color-error)';
+      case TaskState.Cancelled:
+        return 'var(--color-secondary-500)';
+      default:
+        return 'var(--color-secondary-500)';
+    }
+  };
 
-    const taskType =
-      typeof type === 'string'
-        ? (Object.values(ListTasksTaskType).find(
-            (v) => v === type || String(v) === type
-          ) as ListTasksTaskType)
-        : type;
-
-    switch (taskType) {
-      case ListTasksTaskType.NUMBER_0: // BuildContainer
-        return (
-          <FunctionOutlined style={{ color: 'var(--color-primary-500)' }} />
-        );
-      case ListTasksTaskType.NUMBER_1: // RestartPedestal
-        return <SyncOutlined style={{ color: 'var(--color-success)' }} />;
-      case ListTasksTaskType.NUMBER_2: // FaultInjection
-        return <SyncOutlined style={{ color: 'var(--color-warning)' }} />;
-      case ListTasksTaskType.NUMBER_3: // RunAlgorithm
-        return <FunctionOutlined style={{ color: 'var(--color-info)' }} />;
-      case ListTasksTaskType.NUMBER_4: // BuildDatapack
-        return <DashboardOutlined style={{ color: 'var(--color-success)' }} />;
-      case ListTasksTaskType.NUMBER_5: // CollectResult
-        return (
-          <DatabaseOutlined style={{ color: 'var(--color-primary-700)' }} />
-        );
-      case ListTasksTaskType.NUMBER_6: // CronJob
-        return (
-          <ClockCircleOutlined
-            style={{ color: 'var(--color-secondary-500)' }}
-          />
-        );
+  const getStateIcon = (state: TaskState) => {
+    switch (state) {
+      case TaskState.Pending:
+        return <ClockCircleOutlined />;
+      case TaskState.Running:
+        return <SyncOutlined spin />;
+      case TaskState.Completed:
+        return <CheckCircleOutlined />;
+      case TaskState.Error:
+        return <CloseCircleOutlined />;
+      case TaskState.Cancelled:
+        return <PauseCircleOutlined />;
       default:
         return <ClockCircleOutlined />;
     }
@@ -304,116 +263,47 @@ const TaskList = () => {
     if (type === undefined || type === null)
       return 'var(--color-secondary-500)';
 
-    const taskType =
-      typeof type === 'string'
-        ? (Object.values(ListTasksTaskType).find(
-            (v) => v === type || String(v) === type
-          ) as ListTasksTaskType)
-        : type;
-
-    switch (taskType) {
-      case ListTasksTaskType.NUMBER_0: // BuildContainer
+    const typeStr = String(type);
+    switch (typeStr) {
+      case '0':
         return 'var(--color-primary-500)';
-      case ListTasksTaskType.NUMBER_1: // RestartPedestal
+      case '1':
         return 'var(--color-success)';
-      case ListTasksTaskType.NUMBER_2: // FaultInjection
+      case '2':
         return 'var(--color-warning)';
-      case ListTasksTaskType.NUMBER_3: // RunAlgorithm
+      case '3':
         return 'var(--color-info)';
-      case ListTasksTaskType.NUMBER_4: // BuildDatapack
+      case '4':
         return 'var(--color-success)';
-      case ListTasksTaskType.NUMBER_5: // CollectResult
+      case '5':
         return 'var(--color-primary-700)';
-      case ListTasksTaskType.NUMBER_6: // CronJob
+      case '6':
         return 'var(--color-secondary-500)';
       default:
         return 'var(--color-secondary-500)';
     }
-  };
-
-  const getStateColor = (state: TaskState) => {
-    switch (state) {
-      case TaskState.Pending: // PENDING
-        return 'var(--color-secondary-300)';
-      case TaskState.Running: // RUNNING
-        return 'var(--color-primary-500)';
-      case TaskState.Completed: // COMPLETED
-        return 'var(--color-success)';
-      case TaskState.Error: // ERROR
-        return 'var(--color-error)';
-      case TaskState.Cancelled: // CANCELLED
-        return 'var(--color-secondary-500)';
-      default:
-        return 'var(--color-secondary-500)';
-    }
-  };
-
-  const getStateIcon = (state: TaskState) => {
-    switch (state) {
-      case TaskState.Pending: // PENDING
-        return <ClockCircleOutlined />;
-      case TaskState.Running: // RUNNING
-        return <SyncOutlined spin />;
-      case TaskState.Completed: // COMPLETED
-        return <CheckCircleOutlined />;
-      case TaskState.Error: // ERROR
-        return <CloseCircleOutlined />;
-      case TaskState.Cancelled: // CANCELLED
-        return <PauseCircleOutlined />;
-      default:
-        return <ClockCircleOutlined />;
-    }
-  };
-
-  const getTaskProgress = (task: TaskResp): number | undefined => {
-    if (String(task.state) === String(TaskState.Completed)) return 100; // COMPLETED
-    if (
-      String(task.state) === String(TaskState.Error) ||
-      String(task.state) === String(TaskState.Cancelled)
-    )
-      return 0; // ERROR or CANCELLED
-    if (String(task.state) === String(TaskState.Running)) return undefined; // indeterminate
-    return 0;
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: setSelectedRowKeys,
   };
 
   const columns = [
     {
-      title: 'Task',
+      title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: '15%',
-      render: (id: string, record: TaskResp) => (
-        <Space>
-          <Avatar
-            size='small'
-            style={{ backgroundColor: getTaskTypeColor(record.type) }}
-            icon={getTaskTypeIcon(record.type)}
-          />
-          <div>
-            <Text strong style={{ fontSize: '0.875rem' }}>
-              {id.substring(0, 8)}
-            </Text>
-            <br />
-            <Text type='secondary' style={{ fontSize: '0.75rem' }}>
-              {record.type}
-            </Text>
-          </div>
-        </Space>
+      width: '10%',
+      render: (id: string) => (
+        <Text strong style={{ fontSize: '0.875rem' }}>
+          {id?.substring(0, 8)}
+        </Text>
       ),
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      width: '15%',
+      width: '14%',
       render: (type: ListTasksTaskType | string | undefined) => (
         <Tag color={getTaskTypeColor(type)} style={{ fontWeight: 500 }}>
-          {type}
+          {getTaskTypeName(type)}
         </Tag>
       ),
       filters: [
@@ -429,7 +319,35 @@ const TaskList = () => {
         record.type === value || String(record.type) === String(value),
     },
     {
-      title: 'Status',
+      title: 'Project',
+      key: 'project',
+      width: '14%',
+      render: (_: unknown, record: TaskResp) => {
+        const projectId = (record as Record<string, unknown>).project_id as
+          | string
+          | undefined;
+        const projectName = (record as Record<string, unknown>).project_name as
+          | string
+          | undefined;
+        if (projectId) {
+          return (
+            <Link
+              to={`/projects/${projectId}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {projectName || projectId.substring(0, 8)}
+            </Link>
+          );
+        }
+        return (
+          <Text type='secondary' style={{ fontSize: '0.75rem' }}>
+            -
+          </Text>
+        );
+      },
+    },
+    {
+      title: 'State',
       dataIndex: 'state',
       key: 'state',
       width: '12%',
@@ -446,13 +364,13 @@ const TaskList = () => {
           <Badge
             status={
               taskState === TaskState.Completed
-                ? 'success' // COMPLETED
+                ? 'success'
                 : taskState === TaskState.Error
-                  ? 'error' // ERROR
+                  ? 'error'
                   : taskState === TaskState.Running
-                    ? 'processing' // RUNNING
+                    ? 'processing'
                     : taskState === TaskState.Cancelled
-                      ? 'warning' // CANCELLED
+                      ? 'warning'
                       : 'default'
             }
             text={
@@ -466,15 +384,15 @@ const TaskList = () => {
                   }}
                 >
                   {taskState === TaskState.Pending
-                    ? 'Pending' // PENDING
+                    ? 'Pending'
                     : taskState === TaskState.Running
-                      ? 'Running' // RUNNING
+                      ? 'Running'
                       : taskState === TaskState.Completed
-                        ? 'Completed' // COMPLETED
+                        ? 'Completed'
                         : taskState === TaskState.Error
-                          ? 'Error' // ERROR
+                          ? 'Error'
                           : taskState === TaskState.Cancelled
-                            ? 'Cancelled' // CANCELLED
+                            ? 'Cancelled'
                             : 'Unknown'}
                 </Text>
               </Space>
@@ -494,52 +412,6 @@ const TaskList = () => {
         String(record.state) === String(value),
     },
     {
-      title: 'Progress',
-      key: 'progress',
-      width: '10%',
-      render: (_: unknown, record: TaskResp) => {
-        const isRunning = String(record.state) === String(TaskState.Running);
-        if (isRunning) {
-          return (
-            <Space size='small'>
-              <SyncOutlined
-                spin
-                style={{ color: 'var(--color-primary-500)' }}
-              />
-              <Text type='secondary' style={{ fontSize: '0.75rem' }}>
-                Running
-              </Text>
-            </Space>
-          );
-        }
-        const progress = getTaskProgress(record);
-        return (
-          <Progress
-            percent={progress ?? 0}
-            status={
-              String(record.state) === String(TaskState.Error)
-                ? 'exception' // ERROR
-                : String(record.state) === String(TaskState.Completed)
-                  ? 'success' // COMPLETED
-                  : 'active'
-            }
-            size='small'
-            format={(percent) => `${percent}%`}
-          />
-        );
-      },
-    },
-    {
-      title: 'Retries',
-      key: 'retries',
-      width: '8%',
-      render: () => (
-        <Text code style={{ fontSize: '0.75rem' }}>
-          N/A
-        </Text>
-      ),
-    },
-    {
       title: 'Created',
       dataIndex: 'created_at',
       key: 'created_at',
@@ -551,9 +423,44 @@ const TaskList = () => {
       ),
     },
     {
+      title: 'Duration',
+      key: 'duration',
+      width: '10%',
+      render: (_: unknown, record: TaskResp) => {
+        const start = (record as Record<string, unknown>).created_at as
+          | string
+          | undefined;
+        const end = (record as Record<string, unknown>).updated_at as
+          | string
+          | undefined;
+        if (!start) return <Text type='secondary'>-</Text>;
+
+        const isRunning = String(record.state) === String(TaskState.Running);
+        const endTime = isRunning ? dayjs() : dayjs(end || start);
+        const diffMs = endTime.diff(dayjs(start));
+
+        if (diffMs < 1000)
+          return <Text style={{ fontSize: '0.75rem' }}>&lt;1s</Text>;
+        if (diffMs < 60000) {
+          return (
+            <Text style={{ fontSize: '0.75rem' }}>
+              {Math.round(diffMs / 1000)}s
+            </Text>
+          );
+        }
+        const mins = Math.floor(diffMs / 60000);
+        const secs = Math.round((diffMs % 60000) / 1000);
+        return (
+          <Text style={{ fontSize: '0.75rem' }}>
+            {mins}m {secs}s
+          </Text>
+        );
+      },
+    },
+    {
       title: 'Actions',
       key: 'actions',
-      width: '12%',
+      width: '8%',
       render: (_: unknown, record: TaskResp) => (
         <Space size='small'>
           <Tooltip title='View Details'>
@@ -561,27 +468,22 @@ const TaskList = () => {
               type='text'
               size='small'
               icon={<EyeOutlined />}
-              onClick={() => handleViewTask(record.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewTask(record.id);
+              }}
             />
           </Tooltip>
-          {String(record.state) === String(TaskState.Running) && ( // RUNNING
-            <Tooltip title='Cancel Task'>
-              <Button
-                type='text'
-                size='small'
-                danger
-                icon={<CloseCircleOutlined />}
-                onClick={() => handleCancelTask(record)}
-              />
-            </Tooltip>
-          )}
           <Tooltip title='Delete Task'>
             <Button
               type='text'
               size='small'
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleDeleteTask(record.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteTask(record.id);
+              }}
             />
           </Tooltip>
         </Space>
@@ -687,7 +589,7 @@ const TaskList = () => {
         </Col>
       </Row>
 
-      {/* Filters and Actions */}
+      {/* Filters */}
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]} align='middle'>
           <Col xs={24} sm={12} md={6}>
@@ -738,19 +640,6 @@ const TaskList = () => {
               <Option value={TaskState.Cancelled}>Cancelled</Option>
             </Select>
           </Col>
-          <Col xs={24} sm={24} md={10} style={{ textAlign: 'right' }}>
-            <Space>
-              {selectedRowKeys.length > 0 && (
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={handleBatchDelete}
-                >
-                  Delete Selected ({selectedRowKeys.length})
-                </Button>
-              )}
-            </Space>
-          </Col>
         </Row>
       </Card>
 
@@ -758,7 +647,6 @@ const TaskList = () => {
       <Card className='table-card'>
         <Table
           rowKey='id'
-          rowSelection={rowSelection}
           columns={columns}
           dataSource={(tasksData?.items as TaskResp[] | undefined) || []}
           loading={isLoading}
@@ -772,6 +660,10 @@ const TaskList = () => {
               `${range[0]}-${range[1]} of ${total} tasks`,
           }}
           onChange={handleTableChange}
+          onRow={(record) => ({
+            onClick: () => handleViewTask(record.id),
+            style: { cursor: 'pointer' },
+          })}
           locale={{
             emptyText: <Empty description='No tasks found' />,
           }}

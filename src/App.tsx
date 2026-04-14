@@ -4,7 +4,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Spin } from 'antd';
 
 import MainLayout from '@/components/layout/MainLayout';
-import WorkspaceLayout from '@/components/layout/WorkspaceLayout';
 import { useAuthStore } from '@/store/auth';
 
 // Lazy load all page components
@@ -13,34 +12,32 @@ const Login = lazy(() => import('@/pages/auth/Login'));
 // User pages
 const HomePage = lazy(() => import('@/pages/home/HomePage'));
 const ProjectList = lazy(() => import('@/pages/projects/ProjectList'));
-const ProjectOverview = lazy(() => import('@/pages/projects/ProjectOverview'));
-const ProjectSettings = lazy(() => import('@/pages/projects/ProjectSettings'));
+const ProjectDetail = lazy(() => import('@/pages/projects/ProjectDetail'));
 
-// Project-scoped pages (injections, executions under /:teamName/:projectName)
-const ProjectInjectionList = lazy(
-  () => import('@/pages/projects/ProjectInjectionList')
+// Project action pages
+const InjectionWizard = lazy(
+  () => import('@/pages/injections/InjectionWizard')
 );
-const ProjectExecutionList = lazy(
-  () => import('@/pages/projects/ProjectExecutionList')
+const CreateExecutionForm = lazy(
+  () => import('@/pages/executions/CreateExecutionForm')
 );
-const ProjectInjectionDetail = lazy(
-  () => import('@/pages/projects/ProjectInjectionDetail')
+
+// Detail pages
+const DatapackDetail = lazy(() => import('@/pages/datapacks/DatapackDetail'));
+const ExecutionDetail = lazy(
+  () => import('@/pages/executions/ExecutionDetail')
 );
-const ProjectExecutionDetail = lazy(
-  () => import('@/pages/projects/ProjectExecutionDetail')
-);
-const InjectionCreate = lazy(
-  () => import('@/pages/injections/InjectionCreate')
-);
-const ExecutionCreatePage = lazy(
-  () => import('@/pages/executions/ExecutionCreatePage')
-);
-const AlgorithmListPage = lazy(
-  () => import('@/pages/projects/algorithms/AlgorithmListPage')
-);
+
+// Tasks
+const TaskList = lazy(() => import('@/pages/tasks/TaskList'));
+const TaskDetail = lazy(() => import('@/pages/tasks/TaskDetail'));
+
+// User settings
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
+const Settings = lazy(() => import('@/pages/settings/Settings'));
 
 // Admin pages
-const ProjectEdit = lazy(() => import('@/pages/projects/ProjectEdit'));
+const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const ContainerList = lazy(() => import('@/pages/containers/ContainerList'));
 const ContainerForm = lazy(() => import('@/pages/containers/ContainerForm'));
 const ContainerDetail = lazy(
@@ -52,25 +49,7 @@ const ContainerVersions = lazy(
 const DatasetList = lazy(() => import('@/pages/datasets/DatasetList'));
 const DatasetForm = lazy(() => import('@/pages/datasets/DatasetForm'));
 const DatasetDetail = lazy(() => import('@/pages/datasets/DatasetDetail'));
-const EvaluationList = lazy(() => import('@/pages/evaluations/EvaluationList'));
-const EvaluationDetail = lazy(
-  () => import('@/pages/evaluations/EvaluationDetail')
-);
-const TaskList = lazy(() => import('@/pages/tasks/TaskList'));
-const TaskDetail = lazy(() => import('@/pages/tasks/TaskDetail'));
 const SystemSettings = lazy(() => import('@/pages/system/SystemSettings'));
-const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
-const Settings = lazy(() => import('@/pages/settings/Settings'));
-
-// Team pages
-const TeamDetailPage = lazy(() => import('@/pages/teams/TeamDetailPage'));
-
-// Traces pages
-const TracesPage = lazy(() => import('@/pages/traces/TracesPage'));
-const TraceDetailPage = lazy(() => import('@/pages/traces/TraceDetailPage'));
-
-// Admin pages (new)
-const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -108,7 +87,7 @@ function App() {
         }
       />
 
-      {/* Protected routes - Main Layout (sidebar visible) */}
+      {/* Protected routes - ALL under MainLayout */}
       <Route
         element={
           isAuthenticated ? <MainLayout /> : <Navigate to='/login' replace />
@@ -129,7 +108,7 @@ function App() {
           }
         />
 
-        {/* Projects List */}
+        {/* Projects */}
         <Route
           path='projects'
           element={
@@ -139,10 +118,64 @@ function App() {
           }
         />
         <Route
-          path='projects/new'
+          path='projects/:id'
           element={
             <Suspense fallback={<LoadingFallback />}>
-              <ProjectEdit />
+              <ProjectDetail />
+            </Suspense>
+          }
+        />
+        <Route
+          path='projects/:id/inject'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <InjectionWizard />
+            </Suspense>
+          }
+        />
+        <Route
+          path='projects/:id/execute'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CreateExecutionForm />
+            </Suspense>
+          }
+        />
+
+        {/* Datapacks */}
+        <Route
+          path='datapacks/:id'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <DatapackDetail />
+            </Suspense>
+          }
+        />
+
+        {/* Executions */}
+        <Route
+          path='executions/:id'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ExecutionDetail />
+            </Suspense>
+          }
+        />
+
+        {/* Tasks */}
+        <Route
+          path='tasks'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TaskList />
+            </Suspense>
+          }
+        />
+        <Route
+          path='tasks/:id'
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TaskDetail />
             </Suspense>
           }
         />
@@ -167,71 +200,7 @@ function App() {
           }
         />
 
-        {/* Tasks (promoted from /admin/tasks) */}
-        <Route
-          path='tasks'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TaskList />
-            </Suspense>
-          }
-        />
-        <Route
-          path='tasks/:id'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TaskDetail />
-            </Suspense>
-          }
-        />
-
-        {/* ==================== Team Routes (/:teamName) ==================== */}
-        <Route path=':teamName'>
-          {/* Default route - redirect to overview */}
-          <Route
-            index
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TeamDetailPage />
-              </Suspense>
-            }
-          />
-          {/* Tab routes */}
-          <Route
-            path='overview'
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TeamDetailPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path='projects'
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TeamDetailPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path='users'
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TeamDetailPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path='settings'
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TeamDetailPage />
-              </Suspense>
-            }
-          />
-        </Route>
-
-        {/* ==================== Admin Routes (/admin/*) ==================== */}
+        {/* ==================== Admin Routes ==================== */}
 
         {/* Admin Users */}
         <Route
@@ -330,141 +299,7 @@ function App() {
         />
       </Route>
 
-      {/* ==================== Project-scoped Routes (/:teamName/:projectName/*) - Workspace Layout ==================== */}
-      {/* These routes are outside MainLayout to hide the main sidebar */}
-      {/* NOTE: Project names cannot use reserved keywords: overview, projects, users, settings */}
-      <Route
-        path=':teamName/:projectName'
-        element={
-          isAuthenticated ? (
-            <Suspense fallback={<LoadingFallback />}>
-              <WorkspaceLayout />
-            </Suspense>
-          ) : (
-            <Navigate to='/login' replace />
-          )
-        }
-      >
-        {/* Project Overview (default) */}
-        <Route
-          index
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectOverview />
-            </Suspense>
-          }
-        />
-
-        {/* Injections */}
-        <Route
-          path='injections'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectInjectionList />
-            </Suspense>
-          }
-        />
-        <Route
-          path='injections/create'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <InjectionCreate />
-            </Suspense>
-          }
-        />
-        <Route
-          path='injections/:id/*'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectInjectionDetail />
-            </Suspense>
-          }
-        />
-
-        {/* Executions */}
-        <Route
-          path='executions'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectExecutionList />
-            </Suspense>
-          }
-        />
-        <Route
-          path='executions/new'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ExecutionCreatePage />
-            </Suspense>
-          }
-        />
-        <Route
-          path='executions/:id'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectExecutionDetail />
-            </Suspense>
-          }
-        />
-
-        {/* Evaluations */}
-        <Route
-          path='evaluations'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <EvaluationList />
-            </Suspense>
-          }
-        />
-        <Route
-          path='evaluations/:id'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <EvaluationDetail />
-            </Suspense>
-          }
-        />
-
-        {/* Algorithms */}
-        <Route
-          path='algorithms'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <AlgorithmListPage />
-            </Suspense>
-          }
-        />
-
-        {/* Traces */}
-        <Route
-          path='traces'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TracesPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path='traces/:id'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TraceDetailPage />
-            </Suspense>
-          }
-        />
-
-        {/* Project Settings */}
-        <Route
-          path='settings'
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ProjectSettings />
-            </Suspense>
-          }
-        />
-      </Route>
-
-      {/* Fallback - redirect unknown routes to home */}
+      {/* Fallback - redirect unknown routes */}
       <Route
         path='*'
         element={
