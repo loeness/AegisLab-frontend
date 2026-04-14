@@ -9,7 +9,7 @@ import {
   SettingOutlined,
   ShrinkOutlined,
 } from '@ant-design/icons';
-import { Badge, Button, Input, Space, Tooltip, Typography } from 'antd';
+import { Badge, Button, Input, Space, Spin, Tooltip, Typography } from 'antd';
 
 import { useRunListSettings } from '@/hooks/useRunListSettings';
 import type {
@@ -325,7 +325,9 @@ const RunsPanel: React.FC<RunsPanelProps> = ({
       {/* Runs list */}
       <div className='runs-panel-list'>
         {loading ? (
-          <div className='runs-panel-loading'>Loading...</div>
+          <div className='runs-panel-loading'>
+            <Spin size='small' />
+          </div>
         ) : processedRuns.length === 0 ? (
           <div className='runs-panel-empty'>
             <Text type='secondary'>No {dataSource} found</Text>

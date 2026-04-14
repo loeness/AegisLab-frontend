@@ -100,7 +100,7 @@
 
 :root[data-theme='dark'] .bulk-action-btn-delete:hover {
   background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  color: var(--color-error);
 }
 
 :root[data-theme='dark'] .bulk-action-clear {

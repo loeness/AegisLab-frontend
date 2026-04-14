@@ -327,7 +327,9 @@ const ConfigTree: React.FC<ConfigTreeProps> = ({
       {/* Search */}
       <div className='config-tree-search'>
         <Input
-          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+          prefix={
+            <SearchOutlined style={{ color: 'var(--color-secondary-300)' }} />
+          }
           placeholder='Search keys with regex'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

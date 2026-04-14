@@ -34,13 +34,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light) 0%,
+    var(--color-primary-200) 100%
+  );
 }
 
 .team-sidebar-avatar-placeholder svg {
   width: 100px;
   height: 100px;
-  color: #4db6ac;
+  color: var(--color-primary-400);
 }
 
 .team-sidebar-name {

@@ -13,8 +13,8 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ data }) => {
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e1e4e8',
+        backgroundColor: 'var(--color-secondary-0)',
+        border: '1px solid var(--color-secondary-200)',
         borderRadius: '6px',
         padding: '16px',
         maxHeight: '70vh',

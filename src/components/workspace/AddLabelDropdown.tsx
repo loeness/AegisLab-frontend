@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { PlusOutlined } from '@ant-design/icons';
 import type { LabelItem } from '@rcabench/client';
+import { useQuery } from '@tanstack/react-query';
 import { Button, Dropdown, Input, message, Select } from 'antd';
+
+import { labelApi } from '@/api/labels';
 
 import './AddLabelDropdown.css';
 
@@ -10,57 +13,6 @@ interface AddLabelDropdownProps {
   existingLabels?: LabelItem[];
   onAddLabel: (key: string, value: string) => Promise<void>;
 }
-
-/**
- * Mock label suggestions based on existing labels
- */
-const getMockLabelSuggestions = (existingLabels: LabelItem[]) => {
-  // Group labels by key
-  const labelsByKey = existingLabels.reduce(
-    (acc, label) => {
-      if (label.key) {
-        if (!acc[label.key]) {
-          acc[label.key] = [];
-        }
-        if (label.value && !acc[label.key].includes(label.value)) {
-          acc[label.key].push(label.value);
-        }
-      }
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
-
-  // Add some common keys if not present
-  const commonKeys = [
-    'env',
-    'version',
-    'model',
-    'dataset',
-    'experiment',
-    'priority',
-    'status',
-  ];
-
-  commonKeys.forEach((key) => {
-    if (!labelsByKey[key]) {
-      labelsByKey[key] = [];
-    }
-  });
-
-  // Add some common values for specific keys
-  if (labelsByKey['env']?.length === 0) {
-    labelsByKey['env'] = ['dev', 'staging', 'production'];
-  }
-  if (labelsByKey['priority']?.length === 0) {
-    labelsByKey['priority'] = ['low', 'medium', 'high', 'critical'];
-  }
-  if (labelsByKey['status']?.length === 0) {
-    labelsByKey['status'] = ['pending', 'in-progress', 'completed', 'failed'];
-  }
-
-  return labelsByKey;
-};
 
 /**
  * Add Label Dropdown Component - W&B style
@@ -79,8 +31,41 @@ const AddLabelDropdown: React.FC<AddLabelDropdownProps> = ({
   const [keySelectOpen, setKeySelectOpen] = useState(false);
   const [valueSelectOpen, setValueSelectOpen] = useState(false);
 
-  // Get label suggestions
-  const labelSuggestions = getMockLabelSuggestions(existingLabels);
+  // Fetch label suggestions from the API
+  const { data: labelsData } = useQuery({
+    queryKey: ['labels', 'suggestions'],
+    queryFn: () => labelApi.getLabels({ page: 1, size: 50 }),
+    staleTime: 60_000,
+  });
+
+  // Build key->values map from API labels + existing labels
+  const labelSuggestions = useMemo(() => {
+    const byKey: Record<string, string[]> = {};
+
+    // Add labels from API response
+    const apiItems = labelsData?.items ?? [];
+    for (const label of apiItems) {
+      const k = (label as { key?: string }).key;
+      const v = (label as { value?: string }).value;
+      if (k) {
+        if (!byKey[k]) byKey[k] = [];
+        if (v && !byKey[k].includes(v)) byKey[k].push(v);
+      }
+    }
+
+    // Merge existing labels passed as props
+    for (const label of existingLabels) {
+      if (label.key) {
+        if (!byKey[label.key]) byKey[label.key] = [];
+        if (label.value && !byKey[label.key].includes(label.value)) {
+          byKey[label.key].push(label.value);
+        }
+      }
+    }
+
+    return byKey;
+  }, [labelsData, existingLabels]);
+
   const availableKeys = Object.keys(labelSuggestions);
 
   // Get available values for selected key

@@ -159,7 +159,7 @@
 }
 
 :root[data-theme='dark'] .table-toolbar-actions .bulk-action-delete:hover {
-  color: #f87171;
-  border-color: #f87171;
+  color: var(--color-error);
+  border-color: var(--color-error);
   background: rgba(239, 68, 68, 0.15);
 }

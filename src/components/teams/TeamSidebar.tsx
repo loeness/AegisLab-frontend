@@ -75,7 +75,7 @@ const TeamSidebar: React.FC<TeamSidebarProps> = ({
       {/* Team Name */}
       <div className='team-sidebar-name'>
         <Title
-          level={3}
+          level={5}
           style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}
         >
           {team.display_name || team.name}

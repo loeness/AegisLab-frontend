@@ -52,17 +52,17 @@ const ChartCard: React.FC<ChartCardProps> = ({
       animationDuration: 300,
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e0e0e0',
+        backgroundColor: 'var(--color-bg-container)',
+        borderColor: 'var(--color-secondary-200)',
         borderWidth: 1,
         textStyle: {
-          color: '#333',
+          color: 'var(--color-secondary-700)',
           fontSize: 12,
         },
         axisPointer: {
           type: 'cross',
           crossStyle: {
-            color: '#999',
+            color: 'var(--color-secondary-400)',
           },
         },
       },
@@ -88,11 +88,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
         nameLocation: 'end',
         nameTextStyle: {
           fontSize: 10,
-          color: '#999',
+          color: 'var(--color-secondary-400)',
         },
         axisLine: {
           lineStyle: {
-            color: '#e0e0e0',
+            color: 'var(--color-secondary-200)',
           },
         },
         axisTick: {
@@ -100,11 +100,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
         },
         axisLabel: {
           fontSize: 10,
-          color: '#999',
+          color: 'var(--color-secondary-400)',
         },
         splitLine: {
           lineStyle: {
-            color: '#f0f0f0',
+            color: 'var(--color-secondary-100)',
           },
         },
       },
@@ -118,11 +118,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
         },
         axisLabel: {
           fontSize: 10,
-          color: '#999',
+          color: 'var(--color-secondary-400)',
         },
         splitLine: {
           lineStyle: {
-            color: '#f0f0f0',
+            color: 'var(--color-secondary-100)',
           },
         },
       },

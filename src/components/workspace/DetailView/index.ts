@@ -19,8 +19,6 @@ export { default as ConfigTree } from './tabs/ConfigTree';
 export { default as GroundTruthTable } from './tabs/GroundTruthTable';
 export type { GroundTruthItem } from './tabs/GroundTruthTable';
 
-export { default as ChartsTab } from './tabs/ChartsTab';
-
 export { default as LogsTab } from './tabs/LogsTab';
 
 export { LogViewer } from './tabs/LogViewer';
@@ -35,4 +33,3 @@ export { default as FaultInjectionPanel } from './tabs/FaultInjectionPanel';
 export { default as FilesTab } from './tabs/FilesTab';
 
 export { default as ArtifactsTab } from './tabs/ArtifactsTab';
-export type { DetectorResult, GranularityResult } from './tabs/ArtifactsTab';

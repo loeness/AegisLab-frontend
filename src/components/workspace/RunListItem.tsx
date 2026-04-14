@@ -24,10 +24,10 @@ import { cropText, needsJsCropping } from '@/utils/textCrop';
 
 // Default colors matching the existing status colors
 const DEFAULT_STATUS_COLORS: Record<RunStatus, string> = {
-  running: '#1890ff',
-  finished: '#52c41a',
-  failed: '#ff4d4f',
-  crashed: '#faad14',
+  running: 'var(--color-primary-500)',
+  finished: 'var(--color-success)',
+  failed: 'var(--color-error)',
+  crashed: 'var(--color-warning)',
 };
 
 export interface RunListItemProps {
@@ -105,7 +105,7 @@ const RunListItem: React.FC<RunListItemProps> = ({
 
   // Determine the color to use (custom color or status-based)
   const dotColor = useMemo(
-    () => color || DEFAULT_STATUS_COLORS[status] || '#1890ff',
+    () => color || DEFAULT_STATUS_COLORS[status] || 'var(--color-primary-500)',
     [color, status]
   );
 
@@ -194,7 +194,7 @@ const RunListItem: React.FC<RunListItemProps> = ({
         size='small'
         icon={
           isVisible ? (
-            <EyeOutlined style={{ color: '#1890ff' }} />
+            <EyeOutlined style={{ color: 'var(--color-primary-500)' }} />
           ) : (
             <EyeInvisibleOutlined />
           )

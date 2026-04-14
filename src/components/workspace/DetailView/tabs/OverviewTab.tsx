@@ -177,7 +177,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         label: 'Author',
         value: (
           <Space size={8}>
-            <UserOutlined style={{ color: '#8c8c8c' }} />
+            <UserOutlined style={{ color: 'var(--color-secondary-400)' }} />
             <Text>{author || '-'}</Text>
           </Space>
         ),

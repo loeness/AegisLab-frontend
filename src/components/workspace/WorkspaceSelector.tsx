@@ -32,7 +32,7 @@ interface WorkspaceSelectorProps {
 const WorkspaceSelector: React.FC<WorkspaceSelectorProps> = ({ onSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock data - replace with actual API call
+  // TODO: Replace with useTeams() hook to fetch real workspace data
   const personalWorkspaces: WorkspaceItem[] = [
     {
       id: '1',

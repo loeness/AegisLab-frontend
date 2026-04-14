@@ -110,9 +110,9 @@ const FilesTable: React.FC<FilesTableProps> = ({
         return (
           <Space>
             {isFolder ? (
-              <FolderOutlined style={{ color: '#faad14' }} />
+              <FolderOutlined style={{ color: 'var(--color-warning)' }} />
             ) : (
-              <FileOutlined style={{ color: '#8c8c8c' }} />
+              <FileOutlined style={{ color: 'var(--color-secondary-400)' }} />
             )}
             {isFolder ? (
               <Text
@@ -184,7 +184,9 @@ const FilesTable: React.FC<FilesTableProps> = ({
       <div style={{ marginBottom: 16 }}>
         <Input
           placeholder='Search files...'
-          prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+          prefix={
+            <SearchOutlined style={{ color: 'var(--color-secondary-400)' }} />
+          }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ width: 300 }}

@@ -50,8 +50,7 @@ function ensureInit(): Promise<void> {
         ? Promise.resolve()
         : perspective_viewer.init_client(fetch(CLIENT_WASM)),
     ]).then(() => {
-      // eslint-disable-next-line no-console
-      console.log('[Perspective] WASM initialized successfully');
+      // WASM initialized
     });
   }
   return _initPromise;
@@ -268,8 +267,8 @@ const ArrowViewer: React.FC<ArrowViewerProps> = ({
             percent={progress}
             size={100}
             strokeColor={{
-              '0%': '#1890ff',
-              '100%': '#52c41a',
+              '0%': 'var(--color-primary-500)',
+              '100%': 'var(--color-success)',
             }}
           />
           <span className='progress-tip'>{progressTip}</span>

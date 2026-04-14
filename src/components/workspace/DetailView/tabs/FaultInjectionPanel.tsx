@@ -17,7 +17,9 @@ const FaultInjectionPanel: React.FC<FaultInjectionPanelProps> = ({
     <div className='fault-injection-panel'>
       <Empty
         image={
-          <ExperimentOutlined style={{ fontSize: 48, color: '#8c8c8c' }} />
+          <ExperimentOutlined
+            style={{ fontSize: 48, color: 'var(--color-secondary-400)' }}
+          />
         }
         description={
           <span className='fault-injection-panel-desc'>

@@ -1,8 +1,14 @@
+import { useState } from 'react';
+
 import {
   BarChartOutlined,
   DownloadOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
+import type {
+  DetectorResultItem,
+  GranularityResultItem,
+} from '@rcabench/client';
 import {
   Badge,
   Button,
@@ -17,30 +23,11 @@ import type { ColumnsType } from 'antd/es/table';
 
 const { Text } = Typography;
 
-// Flexible types to match API responses
-export interface DetectorResult {
-  span_name?: string;
-  anomaly_type?: string;
-  normal_avg_latency?: number;
-  abnormal_avg_latency?: number;
-  normal_success_rate?: number;
-  abnormal_success_rate?: number;
-  [key: string]: unknown;
-}
-
-export interface GranularityResult {
-  rank?: number;
-  result?: string;
-  level?: string;
-  confidence?: number;
-  [key: string]: unknown;
-}
-
 interface ArtifactsTabProps {
-  detectorResults?: DetectorResult[];
-  granularityResults?: GranularityResult[];
+  detectorResults?: DetectorResultItem[];
+  granularityResults?: GranularityResultItem[];
   loading?: boolean;
-  onViewGranularity?: (result: GranularityResult) => void;
+  onViewGranularity?: (result: GranularityResultItem) => void;
   onDownload?: () => void;
 }
 
@@ -54,25 +41,29 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
   onViewGranularity,
   onDownload,
 }) => {
+  const [showPercentiles, setShowPercentiles] = useState(false);
+
   // Detector Results Table columns
-  const detectorColumns: ColumnsType<DetectorResult> = [
+  const detectorColumns: ColumnsType<DetectorResultItem> = [
     {
       title: 'Span Name',
       dataIndex: 'span_name',
       key: 'span_name',
-      width: '25%',
+      width: 180,
       ellipsis: true,
       render: (value?: string) => value || '-',
     },
     {
-      title: 'Anomaly Type',
-      dataIndex: 'anomaly_type',
-      key: 'anomaly_type',
-      width: '15%',
+      title: 'Issues',
+      dataIndex: 'issues',
+      key: 'issues',
+      width: 120,
       render: (type?: string) =>
         type ? (
           <Badge
-            color={type === 'latency' ? '#faad14' : '#f5222d'}
+            color={
+              type === 'latency' ? 'var(--color-warning)' : 'var(--color-error)'
+            }
             text={type}
           />
         ) : (
@@ -80,41 +71,94 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
         ),
     },
     {
-      title: 'Normal Avg Latency',
-      dataIndex: 'normal_avg_latency',
-      key: 'normal_avg_latency',
-      width: '15%',
+      title: 'Normal Avg Duration',
+      dataIndex: 'normal_avg_duration',
+      key: 'normal_avg_duration',
+      width: 150,
       render: (value?: number) =>
         value !== undefined ? `${value.toFixed(2)}ms` : '-',
     },
     {
-      title: 'Abnormal Avg Latency',
-      dataIndex: 'abnormal_avg_latency',
-      key: 'abnormal_avg_latency',
-      width: '15%',
+      title: 'Abnormal Avg Duration',
+      dataIndex: 'abnormal_avg_duration',
+      key: 'abnormal_avg_duration',
+      width: 160,
       render: (value?: number) =>
         value !== undefined ? `${value.toFixed(2)}ms` : '-',
     },
     {
-      title: 'Normal Success Rate',
-      dataIndex: 'normal_success_rate',
-      key: 'normal_success_rate',
-      width: '15%',
+      title: 'Normal Succ Rate',
+      dataIndex: 'normal_succ_rate',
+      key: 'normal_succ_rate',
+      width: 140,
       render: (value?: number) =>
         value !== undefined ? `${(value * 100).toFixed(1)}%` : '-',
     },
     {
-      title: 'Abnormal Success Rate',
-      dataIndex: 'abnormal_success_rate',
-      key: 'abnormal_success_rate',
-      width: '15%',
+      title: 'Abnormal Succ Rate',
+      dataIndex: 'abnormal_succ_rate',
+      key: 'abnormal_succ_rate',
+      width: 150,
       render: (value?: number) =>
         value !== undefined ? `${(value * 100).toFixed(1)}%` : '-',
     },
+    // Percentile columns (shown when expanded)
+    ...(showPercentiles
+      ? ([
+          {
+            title: 'Normal P90',
+            dataIndex: 'normal_p90',
+            key: 'normal_p90',
+            width: 110,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+          {
+            title: 'Normal P95',
+            dataIndex: 'normal_p95',
+            key: 'normal_p95',
+            width: 110,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+          {
+            title: 'Normal P99',
+            dataIndex: 'normal_p99',
+            key: 'normal_p99',
+            width: 110,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+          {
+            title: 'Abnormal P90',
+            dataIndex: 'abnormal_p90',
+            key: 'abnormal_p90',
+            width: 120,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+          {
+            title: 'Abnormal P95',
+            dataIndex: 'abnormal_p95',
+            key: 'abnormal_p95',
+            width: 120,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+          {
+            title: 'Abnormal P99',
+            dataIndex: 'abnormal_p99',
+            key: 'abnormal_p99',
+            width: 120,
+            render: (value?: number) =>
+              value !== undefined ? `${value.toFixed(2)}ms` : '-',
+          },
+        ] as ColumnsType<DetectorResultItem>)
+      : []),
   ];
 
   // Granularity Results Table columns
-  const granularityColumns: ColumnsType<GranularityResult> = [
+  const granularityColumns: ColumnsType<GranularityResultItem> = [
     {
       title: 'Rank',
       dataIndex: 'rank',
@@ -126,7 +170,11 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
             count={rank}
             style={{
               backgroundColor:
-                rank === 1 ? '#10b981' : rank === 2 ? '#f59e0b' : '#6b7280',
+                rank === 1
+                  ? 'var(--color-success)'
+                  : rank === 2
+                    ? 'var(--color-warning)'
+                    : 'var(--color-secondary-500)',
             }}
           />
         ) : (
@@ -160,10 +208,10 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
             size='small'
             strokeColor={
               confidence >= 0.8
-                ? '#10b981'
+                ? 'var(--color-success)'
                 : confidence >= 0.5
-                  ? '#f59e0b'
-                  : '#ef4444'
+                  ? 'var(--color-warning)'
+                  : 'var(--color-error)'
             }
             format={(percent) => `${percent}%`}
           />
@@ -175,7 +223,7 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
       title: 'Actions',
       key: 'actions',
       width: '15%',
-      render: (_: unknown, record: GranularityResult) =>
+      render: (_: unknown, record: GranularityResultItem) =>
         onViewGranularity ? (
           <Button
             type='link'
@@ -210,11 +258,19 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
           <Card
             title='Anomaly Detection Results'
             extra={
-              onDownload && (
-                <Button icon={<DownloadOutlined />} onClick={onDownload}>
-                  Export
+              <Space>
+                <Button
+                  size='small'
+                  onClick={() => setShowPercentiles((v) => !v)}
+                >
+                  {showPercentiles ? 'Hide Percentiles' : 'Show Percentiles'}
                 </Button>
-              )
+                {onDownload && (
+                  <Button icon={<DownloadOutlined />} onClick={onDownload}>
+                    Export
+                  </Button>
+                )}
+              </Space>
             }
           >
             <Table
@@ -228,6 +284,7 @@ const ArtifactsTab: React.FC<ArtifactsTabProps> = ({
                 showQuickJumper: true,
               }}
               size='middle'
+              scroll={showPercentiles ? { x: 1400 } : undefined}
             />
           </Card>
         )}

@@ -99,7 +99,7 @@ const GroundTruthTable: React.FC<GroundTruthTableProps> = ({
         width: 100,
         fixed: 'left',
         render: (text: string) => (
-          <Text strong style={{ color: '#8c8c8c' }}>
+          <Text strong style={{ color: 'var(--color-secondary-400)' }}>
             {text}
           </Text>
         ),
@@ -222,7 +222,9 @@ const GroundTruthTable: React.FC<GroundTruthTableProps> = ({
       {/* Search */}
       <div className='ground-truth-search'>
         <Input
-          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+          prefix={
+            <SearchOutlined style={{ color: 'var(--color-secondary-300)' }} />
+          }
           placeholder='Search ground truth data'
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

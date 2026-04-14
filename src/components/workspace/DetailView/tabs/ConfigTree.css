@@ -15,14 +15,14 @@
 
 .config-tree-title {
   font-size: 16px;
-  color: #262626;
+  color: var(--color-secondary-800);
 }
 
 .config-tree-header .ant-btn-link {
   padding: 0;
   height: auto;
   font-size: 13px;
-  color: #1890ff;
+  color: var(--color-primary-500);
 }
 
 /* Description */
@@ -32,7 +32,7 @@
 }
 
 .config-tree-description .ant-typography {
-  color: #8c8c8c;
+  color: var(--color-secondary-400);
   font-style: italic;
 }
 
@@ -43,23 +43,23 @@
 
 .config-tree-search .ant-input-affix-wrapper {
   border-radius: 4px;
-  border-color: #d9d9d9;
+  border-color: var(--color-secondary-300);
 }
 
 .config-tree-search .ant-input-affix-wrapper:hover,
 .config-tree-search .ant-input-affix-wrapper:focus {
-  border-color: #1890ff;
+  border-color: var(--color-primary-500);
 }
 
 .config-tree-search input::placeholder {
-  color: #bfbfbf;
+  color: var(--color-secondary-300);
 }
 
 /* Tree content */
 .config-tree-content {
   flex: 1;
   overflow: auto;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--color-secondary-100);
   border-radius: 4px;
   padding: 8px 0;
 }
@@ -88,7 +88,7 @@
 }
 
 .config-tree-node-content:hover {
-  background-color: #f5f5f5;
+  background-color: var(--color-secondary-100);
 }
 
 .config-tree-node-content.root-node {
@@ -101,7 +101,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #595959;
+  color: var(--color-secondary-500);
   font-size: 10px;
   flex-shrink: 0;
   margin-right: 6px;
@@ -116,7 +116,7 @@
 
 .config-tree-key {
   font-weight: 600;
-  color: #262626;
+  color: var(--color-secondary-800);
   margin-right: 8px;
   flex-shrink: 0;
 }
@@ -128,12 +128,12 @@
 }
 
 .config-tree-bracket {
-  color: #8c8c8c;
+  color: var(--color-secondary-400);
   font-size: 12px;
 }
 
 .config-tree-count {
-  color: #1890ff;
+  color: var(--color-primary-500);
   font-size: 12px;
 }
 
@@ -145,19 +145,19 @@
 }
 
 .config-tree-value-string {
-  color: #22863a;
+  color: var(--color-success);
 }
 
 .config-tree-value-number {
-  color: #1890ff;
+  color: var(--color-primary-500);
 }
 
 .config-tree-value-boolean {
-  color: #d73a49;
+  color: var(--color-error);
 }
 
 .config-tree-value-null {
-  color: #d73a49;
+  color: var(--color-error);
   font-style: normal;
 }
 
@@ -176,12 +176,12 @@
 }
 
 .config-tree-content::-webkit-scrollbar-thumb {
-  background: #d9d9d9;
+  background: var(--color-secondary-300);
   border-radius: 3px;
 }
 
 .config-tree-content::-webkit-scrollbar-thumb:hover {
-  background: #bfbfbf;
+  background: var(--color-secondary-400);
 }
 
 /* Raw data modal */
@@ -192,7 +192,7 @@
 }
 
 .raw-data-modal-content {
-  background: #f5f5f5;
+  background: var(--color-secondary-100);
   padding: 16px;
   border-radius: 4px;
   margin: 0;

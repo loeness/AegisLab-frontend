@@ -578,7 +578,13 @@ function WorkspaceTable<T extends { id: number | string; children?: T[] }>({
               style={{ flex: 1, minWidth: 0 }}
             >
               {col.title}
-              <span style={{ marginLeft: 8, fontSize: 11, color: '#8c8c8c' }}>
+              <span
+                style={{
+                  marginLeft: 8,
+                  fontSize: 11,
+                  color: 'var(--color-secondary-400)',
+                }}
+              >
                 {visualizedCount} visualized
               </span>
             </span>
